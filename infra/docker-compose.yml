@@ -1,17 +1,29 @@
 version: '3.3'
-services:
 
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+volumes:
+  pg_data:
+  static:
+  media:
+
+services:
+  db:
+    image: postgres:13
+    env_file: .env
     volumes:
-      - ../frontend/:/app/result_build/
+      - pg_data:/var/lib/postgresql/data
+  frontend:
+    env_file: .env
+    build: ../frontend/
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static:/frontend_static
   nginx:
     image: nginx:1.19.3
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ../frontend/build:/usr/share/nginx/html/
+      - static:/static/
       - ../docs/:/usr/share/nginx/html/api/docs/
+    depends_on:
+      - frontend
