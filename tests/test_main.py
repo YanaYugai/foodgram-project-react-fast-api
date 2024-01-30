@@ -103,7 +103,7 @@ def test_update_recipe_uncorrect_value():
             headers={"Authorization": "Token TOKENVALUE"},
             json=json
         )
-        assert response.status_code == 400, "Возможно изменить рецепт с некорректным количеством ингридиентов"
+        assert response.status_code == 400, "Возможно изменить рецепт без необходимого поля"
         assert response.json() == {
             key: [
                 "Обязательное поле."
@@ -141,9 +141,19 @@ def test_update_recipe_uncorrect_value():
     }
 
 
-def test_get_recipes():
-    response = client.get(
-        '/api/recipes/'
+def test_del_recipes():
+    response = client.delete(
+        '/api/recipes/1/',
+        headers={"Authorization": "Token TOKENVALUE"}
     )
+    response.status_code == 204
 
+
+def test_nonexistent_recipe():
+    response = client.get('/api/recipes/100')
+    assert response.status_code == 404
+    assert response.json == {"detail": "Страница не найдена."}
+    response = client.delete('/api/recipes/100', headers={"Authorization": "Token TOKENVALUE"})
+    assert response.status_code == 404
+    assert response.json == {"detail": "Страница не найдена."}
 
