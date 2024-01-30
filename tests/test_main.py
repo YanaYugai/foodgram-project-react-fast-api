@@ -149,11 +149,15 @@ def test_del_recipes():
     response.status_code == 204
 
 
-def test_nonexistent_recipe():
-    response = client.get('/api/recipes/100')
-    assert response.status_code == 404
-    assert response.json == {"detail": "Страница не найдена."}
+def test_delete_nonexistent_recipe():
     response = client.delete('/api/recipes/100', headers={"Authorization": "Token TOKENVALUE"})
     assert response.status_code == 404
     assert response.json == {"detail": "Страница не найдена."}
 
+
+def test_nonexistent_objects():
+    urls = ('/api/recipes/100', '/api/ingredients/2000/', '/api/tags/7')
+    for url in urls:
+        response = client.get(url)
+        assert response.status_code == 404
+        assert response.json == {"detail": "Страница не найдена."}
