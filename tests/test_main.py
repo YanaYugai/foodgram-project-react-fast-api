@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
-from backend.app.temporary_db import users, recipes
+from backend.app.temporary_db import users, recipes, ingredients, tags
 
 
 client = TestClient(app)
@@ -161,3 +161,12 @@ def test_nonexistent_objects():
         response = client.get(url)
         assert response.status_code == 404
         assert response.json == {"detail": "Страница не найдена."}
+
+
+def test_get_tag_ingredient():
+    urls = {'/api/ingredients/1': ingredients, '/api/tags/1': tags}
+    for url, model in urls.values():
+        response = client.get(url)
+        assert response.status_code == 200
+        assert response.json == model[1]
+        
