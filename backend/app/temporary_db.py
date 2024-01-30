@@ -22,7 +22,7 @@ recipes = {
         "id": 0,
         "tags": [
             {
-                "id": 1,
+                "id": 0,
                 "name": "Завтрак",
                 "color": "#E26C2D",
                 "slug": "breakfast"
@@ -39,9 +39,9 @@ recipes = {
             "ingredients": [
                 {
                     "id": 0,
-                    "name": "Картофель отварной",
-                    "measurement_unit": "г",
-                    "amount": 1
+                    "name": "Капуста",
+                    "measurement_unit": "кг",
+                    "amount": 10
                 }
             ],
             "is_favorited": True,
@@ -56,9 +56,9 @@ recipes = {
         "tags": [
             {
                 "id": 1,
-                "name": "Завтрак",
+                "name": "Обед",
                 "color": "#E26C2D",
-                "slug": "breakfast"
+                "slug": "lunch"
             }
         ],
         "author": {
@@ -72,8 +72,8 @@ recipes = {
             "ingredients": [
                 {
                     "id": 1,
-                    "name": "Редис",
-                    "measurement_unit": "г",
+                    "name": "Картошка",
+                    "measurement_unit": "кг"
                     "amount": 10
                 }
             ],
@@ -84,4 +84,44 @@ recipes = {
             "text": "string",
             "cooking_time": 1
     },
+}
+
+tags = {
+    0: {
+        "id": 0,
+        "name": "Завтрак",
+        "color": "#E26C2D",
+        "slug": "breakfast"
+    },
+    1: {
+        "id": 1,
+        "name": "Обед",
+        "color": "#E26C2D",
+        "slug": "lunch"
+    },
+    2: {
+        "id": 2,
+        "name": "Ужин",
+        "color": "#E26C2D",
+        "slug": "dinner"
+    },
+}
+
+ingredients = {
+    0: {
+        "id": 0,
+        "name": "Капуста",
+        "measurement_unit": "кг"
+    },
+    1: {
+        "id": 1,
+        "name": "Картошка",
+        "measurement_unit": "кг"
+    },
+    2: {
+        "id": 2,
+        "name": "Морковь",
+        "measurement_unit": "кг"
+    },
+
 }
