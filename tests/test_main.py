@@ -26,7 +26,7 @@ def test_create_recipe():
         }
     )
     assert response.status_code == 200
-    assert response.json() == recipes[:-1]
+    assert response.json() == list(recipes)[:-1]
 
 
 def test_create_recipe_failure():
@@ -55,44 +55,12 @@ def test_create_recipe_failure():
 
 def test_get_recipe():
     response = client.get('/api/recipes/1')
-    assert response.status_code==200
-    assert response.json=={
-        "id": 0,
-        "tags": [
-            {
-            "id": 0,
-            "name": "Завтрак",
-            "color": "#E26C2D",
-            "slug": "breakfast"
-            }
-        ],
-        "author": {
-            "email": "user@example.com",
-            "id": 0,
-            "username": "string",
-            "first_name": "Вася",
-            "last_name": "Пупкин",
-            "is_subscribed": False
-        },
-        "ingredients": [
-            {
-            "id": 0,
-            "name": "Картофель отварной",
-            "measurement_unit": "г",
-            "amount": 1
-            }
-        ],
-        "is_favorited": True,
-        "is_in_shopping_cart": True,
-        "name": "string",
-        "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
-        "text": "string",
-        "cooking_time": 1
-}
+    assert response.status_code == 200
+    assert response.json == recipes[1]
 
 
 def test_update_recipe():
-    response = client.post(
+    response = client.patch(
         "/api/recipes/1/",
         headers={"Authorization": "Token TOKENVALUE"},
         json={
@@ -110,37 +78,61 @@ def test_update_recipe():
         }
     )
     assert response.status_code == 200
-    assert response.json() == {
-        "id": 0,
-        "tags": [
-            {
-                "id": 1,
-                "name": "Завтрак",
-                "color": "#E26C2D",
-                "slug": "breakfast"
-            }
-        ],
-        "author": {
-            "email": "user@example.com",
-            "id": 0,
-            "username": "string",
-            "first_name": "Вася",
-            "last_name": "Пупкин",
-            "is_subscribed": False
-            },
+    assert response.json() == recipes[1]
+
+
+def test_update_recipe_uncorrect_value():
+    "Невозможно обновить рецепт с переданными некорректными данными"
+    response = client.patch(
+        "/api/recipes/1/",
+        headers={"Authorization": "Token TOKENVALUE"},
+        json={
             "ingredients": [
                 {
-                    "id": 0,
-                    "name": "Картофель отварной",
-                    "measurement_unit": "г",
-                    "amount": 1
+                    "id": 112,
+                    "amount": 0
                 }
             ],
-            "is_favorited": True,
-            "is_in_shopping_cart": True,
+            "tags": [3],
+            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
             "name": "string",
-            "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
             "text": "string",
             "cooking_time": 1
+        }
+    )
+    assert response.status_code == 400, "Возможно изменить рецепт с некорректным количеством ингридиентов"
+    assert response.json() == {
+            "ingredients": [
+                {
+                    "id": 112,
+                    "amount": [
+                        "Убедитесь, что это значение больше либо равно 1."
+                    ]
+                },
+            ],
+}
+    response = client.patch(
+        "/api/recipes/1/",
+        headers={"Authorization": "Token TOKENVALUE"},
+        json={
+            "tags": [3],
+            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+            "name": "string",
+            "text": "string",
+            "cooking_time": 1
+        }
+    )
+    assert response.status_code == 400, "Возможно изменить рецепт без обязательного поля"
+    assert response.json() == {
+        "ingredients": [
+            "Обязательное поле."
+        ]
     }
+
+
+def test_get_recipes():
+    response = client.get(
+        '/api/recipes/'
+    )
+
 
