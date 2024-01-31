@@ -6,6 +6,26 @@ from tests.example_responses import users, users_create
 test_nonexistent_objects('/api/users/100/', client)
 
 
+def test_get_users():
+    raise NotImplementedError
+
+
+def test_get_profile():
+    raise NotImplementedError
+
+
+def test_create_token():
+    raise NotImplementedError
+
+
+def test_delete_token():
+    raise NotImplementedError
+
+
+def test_change_password():
+    raise NotImplementedError
+
+
 def test_get_user():
     response = client.get('/api/users/1/')
     assert response.status_code == 200
