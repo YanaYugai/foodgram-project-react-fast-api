@@ -123,5 +123,14 @@ ingredients = {
         "name": "Морковь",
         "measurement_unit": "кг"
     },
+}
 
+users_create = {
+    0: {
+        "email": "vpupkin@yandex.ru",
+        "id": 0,
+        "username": "vasya.pupkin",
+        "first_name": "Вася",
+        "last_name": "Пупкин"
+    },
 }
