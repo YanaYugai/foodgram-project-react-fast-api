@@ -1,16 +1,8 @@
-from fastapi.testclient import TestClient
-
-from backend.app.main import app
 from tests.example_responses import recipes
-from tests.utils import test_nonexistent_objects
+import http
 
 
-client = TestClient(app)
-
-test_nonexistent_objects('/api/recipes/100', client)
-
-
-def test_create_recipe():
+def test_create_recipe(client):
     response = client.post(
         "/api/recipes/",
         headers={"Authorization": "Token TOKENVALUE"},
@@ -28,11 +20,11 @@ def test_create_recipe():
             "cooking_time": 1
         }
     )
-    assert response.status_code == 201
+    assert response.status_code == http.HTTPStatus.CREATED
     assert response.json() == recipes[2]
 
 
-def test_create_recipe_failure():
+def test_create_recipe_failure(client):
     response = client.post(
         "/api/recipes/",
         headers={"Authorization": "Token invalid_token"},
@@ -50,19 +42,19 @@ def test_create_recipe_failure():
             "cooking_time": 1
         }
     )
-    assert response.status_code == 401
+    assert response.status_code == http.HTTPStatus.UNAUTHORIZED
     assert response.json() == {
         "detail": "Учетные данные не были предоставлены."
     }
 
 
-def test_get_recipe():
+def test_get_recipe(client):
     response = client.get('/api/recipes/1')
-    assert response.status_code == 200
-    assert response.json == recipes[1]
+    assert response.status_code == http.HTTPStatus.OK
+    assert response.json() == recipes[1]
 
 
-def test_update_recipe():
+def test_update_recipe(client):
     response = client.patch(
         "/api/recipes/1/",
         headers={"Authorization": "Token TOKENVALUE"},
@@ -80,12 +72,12 @@ def test_update_recipe():
             "cooking_time": 1
         }
     )
-    assert response.status_code == 200
+    assert response.status_code == http.HTTPStatus.OK
     assert response.json() == recipes[1]
 
 
 # TODO: refactoring required
-def test_update_recipe_uncorrect_value():
+def test_update_recipe_uncorrect_value(client):
     "Невозможно обновить рецепт с переданными некорректными данными"
     json = {
             "ingredients": [
@@ -108,7 +100,7 @@ def test_update_recipe_uncorrect_value():
             headers={"Authorization": "Token TOKENVALUE"},
             json=json
         )
-        assert response.status_code == 400, "Возможно изменить рецепт без необходимого поля"
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST, "Возможно изменить рецепт без необходимого поля"
         assert response.json() == {
             key: [
                 "Обязательное поле."
@@ -133,7 +125,7 @@ def test_update_recipe_uncorrect_value():
             "cooking_time": 1
         }
     )
-    assert response.status_code == 400, "Возможно изменить рецепт с некорректным количеством ингридиентов"
+    assert response.status_code ==  http.HTTPStatus.BAD_REQUEST, "Возможно изменить рецепт с некорректным количеством ингридиентов"
     assert response.json() == {
             "ingredients": [
                 {
@@ -146,15 +138,15 @@ def test_update_recipe_uncorrect_value():
     }
 
 
-def test_delete_recipe():
+def test_delete_recipe(client):
     response = client.delete(
         '/api/recipes/1/',
         headers={"Authorization": "Token TOKENVALUE"}
     )
-    assert response.status_code == 204
+    assert response.status_code == http.HTTPStatus.NO_CONTENT
 
 
-def test_delete_nonexistent_recipe():
+def test_delete_nonexistent_recipe(client):
     response = client.delete('/api/recipes/100', headers={"Authorization": "Token TOKENVALUE"})
-    assert response.status_code == 404
-    assert response.json == {"detail": "Страница не найдена."}
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
+    assert response.json() == {"detail": "Страница не найдена."}
