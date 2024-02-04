@@ -36,7 +36,7 @@ def test_post_user(client):
             "username": "vasya.pupkin",
             "first_name": "Вася",
             "last_name": "Пупкин",
-            "password": "Qwerty123"
+            "password": "Qwerty123",
         },
     )
     assert response.status_code == http.HTTPStatus.CREATED
@@ -45,5 +45,5 @@ def test_post_user(client):
         "id": 0,
         "username": "vasya.pupkin",
         "first_name": "Вася",
-        "last_name": "Пупкин"
+        "last_name": "Пупкин",
     }

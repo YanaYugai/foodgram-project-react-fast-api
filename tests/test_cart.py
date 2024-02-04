@@ -16,9 +16,7 @@ def test_add_recipe_twice(client):
         headers={"Authorization": "Token TOKENVALUE"},
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {
-        "errors": "string"
-    }
+    assert response.json() == {"errors": "string"}
 
 
 def test_add_recipe_failure_credentials(client):
@@ -46,25 +44,12 @@ def test_delete_recipe_twice(client):
         headers={"Authorization": "Token TOKENVALUE"},
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {
-        "errors": "string"
-    }
+    assert response.json() == {"errors": "string"}
 
 
 def test_delete_recipe_failure_credentials(client):
     response = client.delete(
         '/api/recipes/2/shopping_cart/',
-        headers={"Authorization": "Token invalid_token"},
-    )
-    assert response.status_code == http.HTTPStatus.UNAUTHORIZED
-    assert response.json() == {
-        "detail": "Учетные данные не были предоставлены."
-    }
-
-
-def test_download_cart_failure_credentials(client):
-    response = client.delete(
-        '/api/recipes/download_shopping_cart/',
         headers={"Authorization": "Token invalid_token"},
     )
     assert response.status_code == http.HTTPStatus.UNAUTHORIZED

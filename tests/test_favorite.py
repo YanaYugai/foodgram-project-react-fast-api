@@ -16,9 +16,7 @@ def test_add_recipe_twice(client):
         headers={"Authorization": "Token TOKENVALUE"},
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {
-        "errors": "string"
-    }
+    assert response.json() == {"errors": "string"}
 
 
 def test_add_recipe_failure_credentials(client):
@@ -46,9 +44,7 @@ def test_delete_recipe_twice(client):
         headers={"Authorization": "Token TOKENVALUE"},
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {
-        "errors": "string"
-    }
+    assert response.json() == {"errors": "string"}
 
 
 def test_delete_recipe_failure_credentials(client):

@@ -5,7 +5,7 @@ users = {
         "username": "vasya",
         "first_name": "Вася",
         "last_name": "Пупкин",
-        "is_subscribed": False
+        "is_subscribed": False,
     },
     1: {
         "email": "user_1@example.com",
@@ -13,7 +13,7 @@ users = {
         "username": "petya",
         "first_name": "Петя",
         "last_name": "Пупкин",
-        "is_subscribed": False
+        "is_subscribed": False,
     },
 }
 
@@ -25,8 +25,8 @@ recipes = {
                 "id": 0,
                 "name": "Завтрак",
                 "color": "#E26C2D",
-                "slug": "breakfast"
-            }
+                "slug": "breakfast",
+            },
         ],
         "author": {
             "email": "user@example.com",
@@ -34,22 +34,22 @@ recipes = {
             "username": "vasya",
             "first_name": "Вася",
             "last_name": "Пупкин",
-            "is_subscribed": False
+            "is_subscribed": False,
+        },
+        "ingredients": [
+            {
+                "id": 0,
+                "name": "Капуста",
+                "measurement_unit": "кг",
+                "amount": 10,
             },
-            "ingredients": [
-                {
-                    "id": 0,
-                    "name": "Капуста",
-                    "measurement_unit": "кг",
-                    "amount": 10
-                }
-            ],
-            "is_favorited": True,
-            "is_in_shopping_cart": True,
-            "name": "string",
-            "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
-            "text": "string",
-            "cooking_time": 1
+        ],
+        "is_favorited": True,
+        "is_in_shopping_cart": True,
+        "name": "string",
+        "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
+        "text": "string",
+        "cooking_time": 1,
     },
     1: {
         "id": 1,
@@ -58,8 +58,8 @@ recipes = {
                 "id": 1,
                 "name": "Обед",
                 "color": "#E26C2D",
-                "slug": "lunch"
-            }
+                "slug": "lunch",
+            },
         ],
         "author": {
             "email": "user_1@example.com",
@@ -67,22 +67,22 @@ recipes = {
             "username": "petya",
             "first_name": "Петя",
             "last_name": "Пупкин",
-            "is_subscribed": False
+            "is_subscribed": False,
+        },
+        "ingredients": [
+            {
+                "id": 1,
+                "name": "Картошка",
+                "measurement_unit": "кг",
+                "amount": 10,
             },
-            "ingredients": [
-                {
-                    "id": 1,
-                    "name": "Картошка",
-                    "measurement_unit": "кг"
-                    "amount": 10
-                }
-            ],
-            "is_favorited": True,
-            "is_in_shopping_cart": True,
-            "name": "string",
-            "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
-            "text": "string",
-            "cooking_time": 1
+        ],
+        "is_favorited": True,
+        "is_in_shopping_cart": True,
+        "name": "string",
+        "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
+        "text": "string",
+        "cooking_time": 1,
     },
 }
 
@@ -91,19 +91,19 @@ tags = {
         "id": 0,
         "name": "Завтрак",
         "color": "#E26C2D",
-        "slug": "breakfast"
+        "slug": "breakfast",
     },
     1: {
         "id": 1,
         "name": "Обед",
         "color": "#E26C2D",
-        "slug": "lunch"
+        "slug": "lunch",
     },
     2: {
         "id": 2,
         "name": "Ужин",
         "color": "#E26C2D",
-        "slug": "dinner"
+        "slug": "dinner",
     },
 }
 
@@ -111,16 +111,16 @@ ingredients = {
     0: {
         "id": 0,
         "name": "Капуста",
-        "measurement_unit": "кг"
+        "measurement_unit": "кг",
     },
     1: {
         "id": 1,
         "name": "Картошка",
-        "measurement_unit": "кг"
+        "measurement_unit": "кг",
     },
     2: {
         "id": 2,
         "name": "Морковь",
-        "measurement_unit": "кг"
+        "measurement_unit": "кг",
     },
 }

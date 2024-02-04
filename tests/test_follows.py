@@ -16,9 +16,7 @@ def test_add_follow_twice(client):
         headers={"Authorization": "Token TOKENVALUE"},
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {
-        "errors": "string"
-    }
+    assert response.json() == {"errors": "string"}
 
 
 def test_add_follow_failure_credentials(client):
@@ -46,9 +44,7 @@ def test_delete_follow_twice(client):
         headers={"Authorization": "Token TOKENVALUE"},
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {
-        "errors": "string"
-    }
+    assert response.json() == {"errors": "string"}
 
 
 def test_delete_follow_failure_credentials(client):
