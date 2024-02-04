@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, status
 from backend.src.recipes import routers as recipes
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from backend.src.ingredients import routers as ingredients
 
 
 app = FastAPI()
@@ -16,3 +17,4 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
 
 
 app.include_router(recipes.router)
+app.include_router(ingredients.router)

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import List
+from backend.src.ingredients.schemas import IngredientsFullInRecipeRead
 
 
 class TagsRead(BaseModel):
@@ -43,7 +44,7 @@ class RecipeRead(BaseModel):
     id: int
     tags: List['TagsRead']
     author: AuthorRead
-    ingredients: List['IngredientsRead']
+    ingredients: List['IngredientsFullInRecipeRead']
     is_favorited: bool
     is_in_shopping_cart: bool
     name: str = Field(max_length=200)
