@@ -1,8 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from typing import List
 import path
 import sys
-from fastapi import Header, HTTPException
 from backend.src.ingredients.schemas import IngredientsRead
 
 

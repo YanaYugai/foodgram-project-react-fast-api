@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import List
-from backend.src.ingredients.schemas import IngredientsFullInRecipeRead, IngredientsInRecipe
+from backend.src.ingredients.schemas import (
+    IngredientsFullInRecipeRead,
+    IngredientsInRecipe,
+)
 from backend.src.users.schemas import AuthorRead
 from backend.src.tags.schemas import TagsRead
 

@@ -18,10 +18,13 @@ tokencorrect = 'TOKENVALUE'
 
 
 @router.post('/', response_model=RecipeRead, status_code=201)
-def create_recipe(recipe: RecipeCreate, Authorization: Annotated[str, Header()]):
+def create_recipe(
+    recipe: RecipeCreate, Authorization: Annotated[str, Header()],
+):
     if Authorization != f'Token {tokencorrect}':
         raise HTTPException(
-            status_code=401, detail="Учетные данные не были предоставлены.",
+            status_code=401,
+            detail="Учетные данные не были предоставлены.",
         )
     return recipes.get(1)
 
@@ -46,7 +49,8 @@ def patch_recipe(
 ):
     if Authorization != f'Token {tokencorrect}':
         raise HTTPException(
-            status_code=401, detail="Учетные данные не были предоставлены.",
+            status_code=401,
+            detail="Учетные данные не были предоставлены.",
         )
     if recipe_id not in recipes:
         raise HTTPException(status_code=404, detail="Страница не найдена.")
@@ -57,7 +61,8 @@ def patch_recipe(
 def delete_recipe(recipe_id: int, Authorization: Annotated[str, Header()]):
     if Authorization != f'Token {tokencorrect}':
         raise HTTPException(
-            status_code=401, detail="Учетные данные не были предоставлены.",
+            status_code=401,
+            detail="Учетные данные не были предоставлены.",
         )
     if recipe_id not in recipes:
         raise HTTPException(status_code=404, detail="Страница не найдена.")

@@ -1,7 +1,11 @@
 from fastapi import APIRouter, HTTPException
 import path
 import sys
-from backend.src.users.schemas import AuthorRead, UserCreation, UserResponseCreation
+from backend.src.users.schemas import (
+    AuthorRead,
+    UserCreation,
+    UserResponseCreation,
+)
 
 
 directory = path.Path(__file__).abspath()
@@ -29,5 +33,5 @@ def post_user(user: UserCreation):
             "username": "vasya.pupkin",
             "first_name": "Вася",
             "last_name": "Пупкин",
-        }
+        },
     )

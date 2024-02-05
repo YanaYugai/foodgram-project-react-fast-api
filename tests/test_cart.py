@@ -26,7 +26,7 @@ def test_add_recipe_failure_credentials(client):
     )
     assert response.status_code == http.HTTPStatus.UNAUTHORIZED
     assert response.json() == {
-        "detail": "Учетные данные не были предоставлены."
+        "detail": "Учетные данные не были предоставлены.",
     }
 
 
@@ -54,5 +54,5 @@ def test_delete_recipe_failure_credentials(client):
     )
     assert response.status_code == http.HTTPStatus.UNAUTHORIZED
     assert response.json() == {
-        "detail": "Учетные данные не были предоставлены."
+        "detail": "Учетные данные не были предоставлены.",
     }

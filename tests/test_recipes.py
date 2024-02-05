@@ -3,13 +3,13 @@ import http
 
 
 dict_1 = {
-            "ingredients": [{"id": 1, "amount": 10}],
-            "tags": [1],
-            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
-            "name": "string",
-            "text": "string",
-            "cooking_time": 1,
-        }
+    "ingredients": [{"id": 1, "amount": 10}],
+    "tags": [1],
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+    "name": "string",
+    "text": "string",
+    "cooking_time": 1,
+}
 
 
 def test_create_recipe_success(client):
@@ -68,7 +68,6 @@ def test_create_recipe_bad_request(client):
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
     assert response.json() == {"detail": "Не все данные были представлены"}
-
 
 
 def test_create_recipe_failure(client):
@@ -156,16 +155,19 @@ def test_update_recipe_uncorrect_value(client):
     ), "Возможно изменить рецепт с некорректным количеством ингридиентов"
     assert response.json() == {"detail": "Не все данные были представлены"}
 
+
 def test_delete_recipe(client):
     response = client.delete(
-        '/api/recipes/1/', headers={"Authorization": "Token TOKENVALUE"},
+        '/api/recipes/1/',
+        headers={"Authorization": "Token TOKENVALUE"},
     )
     assert response.status_code == http.HTTPStatus.NO_CONTENT
 
 
 def test_delete_nonexistent_recipe(client):
     response = client.delete(
-        '/api/recipes/100', headers={"Authorization": "Token TOKENVALUE"},
+        '/api/recipes/100',
+        headers={"Authorization": "Token TOKENVALUE"},
     )
     assert response.status_code == http.HTTPStatus.NOT_FOUND
     assert response.json() == {"detail": "Страница не найдена."}
