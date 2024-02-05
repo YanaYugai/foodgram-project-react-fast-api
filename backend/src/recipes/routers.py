@@ -28,6 +28,8 @@ def create_recipe(recipe: RecipeCreate, Authorization: Annotated[str, Header()])
 
 @router.get('/{recipe_id}/', response_model=RecipeRead)
 def get_recipe(recipe_id: int):
+    if recipe_id not in recipes:
+        raise HTTPException(status_code=404, detail='Страница не найдена.')
     return recipes.get(recipe_id)
 
 

@@ -1,34 +1,15 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import List
-from backend.src.ingredients.schemas import IngredientsFullInRecipeRead
+from backend.src.ingredients.schemas import IngredientsFullInRecipeRead, IngredientsInRecipe
+from backend.src.users.schemas import AuthorRead
+from backend.src.tags.schemas import TagsRead
 
 
-class TagsRead(BaseModel):
+class RecipeReadShort(BaseModel):
     id: int
-    name: str
-    color: str
-    slug: str
-
-
-class IngredientsRead(BaseModel):
-    id: int
-    name: str
-    measurement_unit: str
-    amount: int
-
-
-class IngredientsInRecipe(BaseModel):
-    id: int
-    amount: int
-
-
-class AuthorRead(BaseModel):
-    email: EmailStr
-    id: int
-    username: str
-    first_name: str
-    last_name: str
-    is_subscribed: bool
+    name: str = Field(max_length=200)
+    image: str
+    cooking_time: int = Field(ge=1)
 
 
 class RecipeCreate(BaseModel):
@@ -40,14 +21,10 @@ class RecipeCreate(BaseModel):
     name: str = Field(max_length=200)
 
 
-class RecipeRead(BaseModel):
-    id: int
+class RecipeRead(RecipeReadShort):
     tags: List['TagsRead']
     author: AuthorRead
     ingredients: List['IngredientsFullInRecipeRead']
     is_favorited: bool
     is_in_shopping_cart: bool
-    name: str = Field(max_length=200)
-    image: str
     text: str
-    cooking_time: int = Field(ge=1)
