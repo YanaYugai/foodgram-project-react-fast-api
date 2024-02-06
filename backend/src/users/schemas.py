@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 
 
 class UserResponseCreation(BaseModel):
@@ -19,3 +19,9 @@ class UserCreation(BaseModel):
     first_name: str
     last_name: str
     password: str
+
+    @validator("username")  # pydantic v1
+    def validate_bad_words(cls, username: str):
+        if username == "me":
+            raise ValueError("bad username, choose another")
+        return username
