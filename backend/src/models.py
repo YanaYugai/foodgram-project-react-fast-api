@@ -9,34 +9,35 @@ str150 = Annotated[str, mapped_column(String(150))]
 str200 = Annotated[str, mapped_column(String(200))]
 user_fk = Annotated[int, mapped_column(ForeignKey("user.id"))]
 intpk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
+recipe_id = Annotated[int, mapped_column(ForeignKey("recipe.id"))]
 
 
 class TagsInRecipe(Base):
     __tablename__ = 'tagsinrecipe'
-    __table_args__ = (UniqueConstraint('recipe_id', 'tag_id'))
+    __table_args__ = (UniqueConstraint('recipe_id', 'tag_id'),)
 
     id: Mapped[intpk] = mapped_column(init=False)
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id"))
+    recipe_id: Mapped[recipe_id]
     tag_id: Mapped[int] = mapped_column(ForeignKey("tag.id"))
 
 
 class IngredientsInRecipe(Base):
     __tablename__ = 'ingredientsinrecipe'
-    __table_args__ = (UniqueConstraint('recipe_id', 'ingredient_id'))
+    __table_args__ = (UniqueConstraint('recipe_id', 'ingredient_id'),)
 
     id: Mapped[intpk] = mapped_column(init=False)
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id"))
+    recipe_id: Mapped[recipe_id]
     ingredient_id: Mapped[int] = mapped_column(ForeignKey("tag.id"))
     recipe: Mapped['Recipe'] = relationship('Recipe', back_populates='ingredients_in_recipe')
     amount: Mapped[int]
 
 
 class RecipeUserMixin:
-    __table_args__ = (UniqueConstraint('recipe_id', 'tag_id'))
+    __table_args__ = (UniqueConstraint('recipe_id', 'user_id'),)
 
     id: Mapped[intpk] = mapped_column(init=False)
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    recipe_id: Mapped[recipe_id]
+    user_id: Mapped[user_fk]
 
 
 class Cart(RecipeUserMixin, Base):
@@ -57,8 +58,7 @@ class Recipe(Base):
     image: Mapped[str]
     cooking_time: Mapped[int]
     author: Mapped["User"] = relationship('User', back_populates="recipes")
-    tags: Mapped[List["Recipe"]] = relationship(secondary=lambda: TagsInRecipe, back_populates="recipes")
-    tags_in_recipe: Mapped[List['TagsInRecipe']] = relationship('TagsInRecipe', back_populates='recipe')
+    tags: Mapped[List["Tag"]] = relationship(secondary=lambda: TagsInRecipe, back_populates="recipes")
     ingredients_in_recipe: Mapped[List['IngredientsInRecipe']] = relationship('IngredientsInRecipe', back_populates='recipe')
     ingredients: Mapped[List['Ingredient']] = relationship(secondary=lambda: IngredientsInRecipe, back_populates='recipes')
     in_favorite: Mapped[List['User']] = relationship(secondary=lambda: Favorite, back_populates='recipes_in_favorite')
@@ -73,7 +73,6 @@ class Tag(Base):
     color: Mapped[str] = mapped_column(String(7))
     slug: Mapped[str] = mapped_column(String(200), unique=True)
     recipes: Mapped[List["Recipe"]] = relationship(secondary=lambda: TagsInRecipe, back_populates="tags")
-    tags_in_recipe: Mapped[List['TagsInRecipe']] = relationship('TagsInRecipe', back_populates='tag')
 
 
 class Ingredient(Base):
@@ -85,13 +84,13 @@ class Ingredient(Base):
     recipes: Mapped[List['Recipe']] = relationship(secondary=lambda: IngredientsInRecipe, back_populates='ingredients')
 
 
-class Follow(Base):
-    __tablename__ = 'follow'
-    __table_args__ = (UniqueConstraint('user_id', 'following_id'))
+#class Follow(Base):
+#    __tablename__ = 'follow'
+#    __table_args__ = (UniqueConstraint('user_id', 'following_id'))
 
-    id: Mapped[intpk] = mapped_column(init=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
-    following_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+#    id: Mapped[intpk] = mapped_column(init=False)
+#    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+#    following_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 
 
 class User(Base):
@@ -107,4 +106,3 @@ class User(Base):
     recipes_in_favorite: Mapped[List['Recipe']] = relationship('Recipe', secondary=lambda: Favorite, back_populates='in_favorite')
     recipes_in_cart: Mapped[List['Recipe']] = relationship('Recipe', secondary=lambda: Cart, back_populates='in_cart')
     # followers: Mapped[List['User']] = relationship(secondary=lambda: Follow, back_populates='')
-
