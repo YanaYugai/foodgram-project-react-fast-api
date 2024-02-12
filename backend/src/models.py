@@ -1,51 +1,68 @@
 from database import Base
-from sqlalchemy import String, ForeignKey
-from sqlalchemy.orm import relationship, mapped_column, Mapped
+from sqlalchemy import String, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import relationship, mapped_column, Mapped, declared_attr
 from typing import List, Annotated
 
 
-str150_unique = Annotated[str, mapped_column(String(150), unique=True, nullable=False)]
-str150 = Annotated[str, mapped_column(String(150), nullable=False)]
-str200 = Annotated[str, mapped_column(String(200), nullable=False)]
-user_fk = Annotated[int, mapped_column(ForeignKey("user.id"), default=None)]
-int_not_null = Annotated[int, mapped_column(nullable=False)]
-str_not_null = Annotated[str, mapped_column(nullable=False)]
+str150_unique = Annotated[str, mapped_column(String(150), unique=True)]
+str150 = Annotated[str, mapped_column(String(150))]
+str200 = Annotated[str, mapped_column(String(200))]
+user_fk = Annotated[int, mapped_column(ForeignKey("user.id"))]
 intpk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 
 
 class TagsInRecipe(Base):
     __tablename__ = 'tagsinrecipe'
+    __table_args__ = (UniqueConstraint('recipe_id', 'tag_id'))
 
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id"), primary_key=True)
-    tag_id: Mapped[int] = mapped_column(ForeignKey("tag.id"), primary_key=True)
-    recipe: Mapped['Recipe'] = relationship('Recipe', back_populates='tags_in_recipe', default=None)
-    tag: Mapped['Tag'] = relationship('Tag', back_populates='tags_in_recipe', default=None)
+    id: Mapped[intpk] = mapped_column(init=False)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id"))
+    tag_id: Mapped[int] = mapped_column(ForeignKey("tag.id"))
 
 
 class IngredientsInRecipe(Base):
     __tablename__ = 'ingredientsinrecipe'
+    __table_args__ = (UniqueConstraint('recipe_id', 'ingredient_id'))
 
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id"), primary_key=True)
-    ingredient_id: Mapped[int] = mapped_column(ForeignKey("tag.id"), primary_key=True)
-    recipe: Mapped['Recipe'] = relationship('Recipe', back_populates='ingredients_in_recipe', default=None)
-    ingredient: Mapped['Ingredient'] = relationship('Ingredient', back_populates='ingredients_in_recipe', default=None)
-    amount: Mapped[int_not_null]
+    id: Mapped[intpk] = mapped_column(init=False)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id"))
+    ingredient_id: Mapped[int] = mapped_column(ForeignKey("tag.id"))
+    recipe: Mapped['Recipe'] = relationship('Recipe', back_populates='ingredients_in_recipe')
+    amount: Mapped[int]
+
+
+class RecipeUserMixin:
+    __table_args__ = (UniqueConstraint('recipe_id', 'tag_id'))
+
+    id: Mapped[intpk] = mapped_column(init=False)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+
+
+class Cart(RecipeUserMixin, Base):
+    __tablename__ = 'cart'
+
+
+class Favorite(RecipeUserMixin, Base):
+    __tablename__ = 'favorite'
 
 
 class Recipe(Base):
     __tablename__ = 'recipe'
 
     id: Mapped[intpk] = mapped_column(init=False)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    text: Mapped[str_not_null]
+    name: Mapped[str] = mapped_column(String(255))
+    text: Mapped[str]
     author_id: Mapped[user_fk]
-    image: Mapped[int_not_null]
-    cooking_time: Mapped[int_not_null]
-    author: Mapped["User"] = relationship('User', back_populates="recipes", default=None)
+    image: Mapped[str]
+    cooking_time: Mapped[int]
+    author: Mapped["User"] = relationship('User', back_populates="recipes")
     tags: Mapped[List["Recipe"]] = relationship(secondary=lambda: TagsInRecipe, back_populates="recipes")
-    tags_in_recipe: Mapped[List['TagsInRecipe']] = relationship('TagsInRecipe', back_populates='recipe', default_factory=list)
-    ingredients_in_recipe: Mapped[List['IngredientsInRecipe']] = relationship('IngredientsInRecipe', back_populates='recipe', default_factory=list)
-    ingredients: Mapped[List['Ingredient']] = relationship(secondary=lambda: IngredientsInRecipe, back_populates='recipes', default_factory=list)
+    tags_in_recipe: Mapped[List['TagsInRecipe']] = relationship('TagsInRecipe', back_populates='recipe')
+    ingredients_in_recipe: Mapped[List['IngredientsInRecipe']] = relationship('IngredientsInRecipe', back_populates='recipe')
+    ingredients: Mapped[List['Ingredient']] = relationship(secondary=lambda: IngredientsInRecipe, back_populates='recipes')
+    in_favorite: Mapped[List['User']] = relationship(secondary=lambda: Favorite, back_populates='recipes_in_favorite')
+    in_cart: Mapped[List['User']] = relationship(secondary=lambda: Cart, back_populates='recipes_in_cart')
 
 
 class Tag(Base):
@@ -53,10 +70,10 @@ class Tag(Base):
 
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str200]
-    color: Mapped[str] = mapped_column(String(7), nullable=False)
-    slug: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
-    recipes: Mapped[List["Recipe"]] = relationship(secondary=lambda: TagsInRecipe, back_populates="tags", default_factory=list)
-    tags_in_recipe: Mapped[List['TagsInRecipe']] = relationship('TagsInRecipe', back_populates='tag', default_factory=list)
+    color: Mapped[str] = mapped_column(String(7))
+    slug: Mapped[str] = mapped_column(String(200), unique=True)
+    recipes: Mapped[List["Recipe"]] = relationship(secondary=lambda: TagsInRecipe, back_populates="tags")
+    tags_in_recipe: Mapped[List['TagsInRecipe']] = relationship('TagsInRecipe', back_populates='tag')
 
 
 class Ingredient(Base):
@@ -65,17 +82,16 @@ class Ingredient(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str200]
     measurement_unit: Mapped[str200]
-    recipes: Mapped[List['Recipe']] = relationship(secondary=lambda: IngredientsInRecipe, back_populates='ingredients', default_factory=list)
-    ingredients_in_recipe: Mapped[List['IngredientsInRecipe']] = relationship('IngredientsInRecipe', back_populates='ingredient', default_factory=list)
+    recipes: Mapped[List['Recipe']] = relationship(secondary=lambda: IngredientsInRecipe, back_populates='ingredients')
 
 
 class Follow(Base):
     __tablename__ = 'follow'
+    __table_args__ = (UniqueConstraint('user_id', 'following_id'))
 
-    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'), primary_key=True)
-    following_id: Mapped[int] = mapped_column(ForeignKey('user.id'), primary_key=True)
-    # user: Mapped['User'] = relationship('User', back_populates='following', foreign_keys=[user_id])
-    # follower: Mapped['User'] = relationship('User', back_populates='follower', foreign_keys=[following_id])
+    id: Mapped[intpk] = mapped_column(init=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    following_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 
 
 class User(Base):
@@ -87,6 +103,8 @@ class User(Base):
     first_name: Mapped[str150]
     last_name: Mapped[str150]
     password: Mapped[str150]
-    recipes: Mapped[List["Recipe"]] = relationship('Recipe', back_populates='author', default_factory=list, cascade="all, delete-orphan")
+    recipes: Mapped[List["Recipe"]] = relationship('Recipe', back_populates='author', cascade="all, delete-orphan")
+    recipes_in_favorite: Mapped[List['Recipe']] = relationship('Recipe', secondary=lambda: Favorite, back_populates='in_favorite')
+    recipes_in_cart: Mapped[List['Recipe']] = relationship('Recipe', secondary=lambda: Cart, back_populates='in_cart')
     # followers: Mapped[List['User']] = relationship(secondary=lambda: Follow, back_populates='')
 
