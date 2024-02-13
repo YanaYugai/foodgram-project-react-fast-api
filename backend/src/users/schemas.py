@@ -25,3 +25,8 @@ class UserCreation(BaseModel):
         if username == "me":
             raise ValueError("bad username, choose another")
         return username
+
+
+class UserTokenCreation(BaseModel):
+    email: EmailStr
+    password: str
