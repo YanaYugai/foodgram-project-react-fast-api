@@ -1,6 +1,6 @@
 from models import User
 from sqlalchemy import select
-from sqlalchemy. orm import Session
+from sqlalchemy.orm import Session
 from fastapi import HTTPException, Depends, Header
 from http import HTTPStatus
 from users.schemas import UserTokenCreation, UserCreation
@@ -46,10 +46,15 @@ def create_user(session: Session, data: UserCreation):
     return user
 
 
-#def create_post(token: str = Depends(get), Authorization: Annotated[str, Header()]):
+# def create_post(token: str = Depends(get), Authorization: Annotated[str, Header()]):
 
 
-def delete_object(session: Session, id: int, authorization: dict = Depends(check_token), model: BaseModel):
+def delete_object(
+    session: Session,
+    id: int,
+    model: BaseModel,
+    authorization: dict = Depends(check_token),
+):
     obj = get_object_by_id_or_error(id, session, model)
     session.delete(obj)
     session.commit()

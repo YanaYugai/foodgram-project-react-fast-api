@@ -19,7 +19,8 @@ tokencorrect = 'TOKENVALUE'
 
 @router.post('/', response_model=RecipeRead, status_code=201)
 def create_recipe(
-    recipe: RecipeCreate, Authorization: Annotated[str, Header()],
+    recipe: RecipeCreate,
+    Authorization: Annotated[str, Header()],
 ):
     if Authorization != f'Token {tokencorrect}':
         raise HTTPException(
