@@ -1,5 +1,18 @@
 from tests.example_responses import users
 import http
+from sqlalchemy.orm import Session
+import random
+import string
+from backend.src.users.schemas import UserCreation
+from backend.src.crud.services import create_user
+
+
+def random_lower_string() -> str:
+    return "".join(random.choices(string.ascii_lowercase, k=32))
+
+
+def random_email() -> str:
+    return f"{random_lower_string()}@{random_lower_string()}.com"
 
 
 def test_get_users(client):
@@ -47,3 +60,18 @@ def test_post_user(client):
         "first_name": "Вася",
         "last_name": "Пупкин",
     }
+
+
+def test_create_user(db: Session) -> None:
+    email = random_email()
+    password = random_lower_string()
+    username = random_lower_string()
+    first_name = random_lower_string()
+    last_name = random_lower_string()
+    user_in = UserCreation(email=email, password=password, username=username, first_name=first_name, last_name=last_name)
+    user = create_user(session=db, data=user_in)
+    assert user.email == email
+    assert user.username == username
+    assert user.first_name == first_name
+    assert user.last_name == last_name
+    assert hasattr(user, "password")

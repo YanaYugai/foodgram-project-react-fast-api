@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+from backend.src.crud.services import create_user
 
 
 def get_token(client: TestClient, email: str, password: str):
@@ -21,7 +22,7 @@ def get_authorized_user(db: Session, client: TestClient, email: str, password: s
         'first_name': first_name,
         'last_name': last_name,
     }
-    user = crud.create_user(db, data)
+    user = create_user(db, data)
     password = user.get('password')
     email = user.get('email')
     return get_token(client, email, password)
