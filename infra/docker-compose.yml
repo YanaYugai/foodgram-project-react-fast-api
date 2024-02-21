@@ -16,9 +16,7 @@ services:
       - pg_data:/var/lib/postgresql/data
   backend:
     build: ../backend/
-    command: sh -c "alembic revision -m "create all tables"&&
-                    alembic upgrade head &&
-                    uvicorn main:app --reload"
+    command: sh -c "uvicorn main:app --proxy-headers --host 0.0.0.0 --port 8000"
     depends_on:
       - db
   frontend:
@@ -37,3 +35,4 @@ services:
       - ../docs/:/usr/share/nginx/html/api/docs/
     depends_on:
       - frontend
+      - backend
