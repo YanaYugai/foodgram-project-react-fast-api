@@ -1,4 +1,4 @@
-from backend.database import Base
+from database import Base
 from sqlalchemy import String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, mapped_column, Mapped, declared_attr
 from typing import List, Annotated

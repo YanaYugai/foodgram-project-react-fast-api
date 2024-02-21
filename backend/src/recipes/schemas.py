@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import List
-from backend.src.ingredients.schemas import (
+from src.ingredients.schemas import (
     IngredientsFullInRecipeRead,
     IngredientsInRecipe,
 )
-from backend.src.users.schemas import AuthorRead
-from backend.src.tags.schemas import TagsRead
+from src.users.schemas import AuthorRead
+from src.tags.schemas import TagsRead
 
 
 class RecipeReadShort(BaseModel):

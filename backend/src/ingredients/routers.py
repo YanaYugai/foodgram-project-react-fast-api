@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException
 from typing import List
 import path
 import sys
-from backend.src.ingredients.schemas import IngredientsRead
+from src.ingredients.schemas import IngredientsRead
 
-
+# TODO: from8 to 11 change and delete evryrewhere
 directory = path.Path(__file__).abspath()
 sys.path.append(directory.parent.parent.parent.parent)
 
@@ -18,7 +18,8 @@ router = APIRouter(prefix="/api/ingredients", tags=["ingredients"])
 def get_ingredient(ingredient_id: int):
     if ingredient_id not in ingredients:
         raise HTTPException(
-            status_code=404, detail="Страница не найдена.",
+            status_code=404,
+            detail="Страница не найдена.",
         )
     return ingredients.get(ingredient_id)
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
-from backend.src.tags.schemas import TagsRead
+from src.tags.schemas import TagsRead
 
 import path
 import sys

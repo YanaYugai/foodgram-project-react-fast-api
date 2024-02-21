@@ -1,10 +1,10 @@
-from fastapi import FastAPI, Request, status
-from backend.src.recipes import routers as recipes
+from fastapi import FastAPI, Request, status, Depends
+from src.recipes import routers as recipes
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from backend.src.ingredients import routers as ingredients
-from backend.src.tags import routers as tags
-from backend.src.users import routers as users
+from src.ingredients import routers as ingredients
+from src.tags import routers as tags
+from src.users import routers as users
 
 
 app = FastAPI()

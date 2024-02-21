@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from typing import Annotated, List
-from backend.src.recipes.schemas import RecipeCreate, RecipeRead
+from src.recipes.schemas import RecipeCreate, RecipeRead
 from fastapi import Header, HTTPException
 import path
 import sys
@@ -27,6 +27,7 @@ def create_recipe(
             status_code=401,
             detail="Учетные данные не были предоставлены.",
         )
+    
     return recipes.get(1)
 
 

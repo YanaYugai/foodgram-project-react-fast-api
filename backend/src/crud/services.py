@@ -1,10 +1,10 @@
-from backend.src.models import User, Recipe
+from src.models import User, Recipe
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, Depends, Header
 from http import HTTPStatus
-from backend.src.users.schemas import UserTokenCreation, UserCreation
-from backend.src.recipes.schemas import RecipeCreate
+from src.users.schemas import UserTokenCreation, UserCreation
+from src.recipes.schemas import RecipeCreate
 from pydantic import BaseModel
 
 
