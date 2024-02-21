@@ -1,9 +1,9 @@
 from fastapi.testclient import TestClient
-from backend.main import app
 from pytest import fixture
 from typing import Generator
 from sqlalchemy.orm import Session
-from backend.database import engine
+from main import app
+from database import engine
 
 
 @fixture(scope="session")

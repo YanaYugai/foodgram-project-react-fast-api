@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, select
 import random
 import string
-from backend.src.users.schemas import UserCreation
-from backend.src.models import User
-from backend.src.crud.services import create_user, get_object_by_id_or_error, get_objects
+from src.users.schemas import UserCreation
+from src.models import User
+from src.crud.services import create_user, get_object_by_id_or_error, get_objects
 
 
 def random_lower_string() -> str:
@@ -96,3 +96,4 @@ def test_get_users(db: Session):
     users = get_objects(db, User)
     count_users = db.scalar(select(func.count(User.id)))
     assert len(users) == count_users
+
