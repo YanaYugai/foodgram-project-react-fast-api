@@ -14,7 +14,15 @@ def get_token(client: TestClient, email: str, password: str):
     return headers
 
 
-def get_authorized_user(db: Session, client: TestClient, email: str, password: str, username: str, first_name: str, last_name: str):
+def get_authorized_user(
+    db: Session,
+    client: TestClient,
+    email: str,
+    password: str,
+    username: str,
+    first_name: str,
+    last_name: str,
+):
     data = {
         'email': email,
         'password': password,

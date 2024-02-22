@@ -3,7 +3,8 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    "url", ['/api/recipes/100/', '/api/tags/100/', '/api/ingredients/1000/'],
+    "url",
+    ['/api/recipes/100/', '/api/tags/100/', '/api/ingredients/1000/'],
 )
 def test_nonexistent_objects(url, client):
     response = client.get(url)
@@ -17,7 +18,8 @@ def test_nonexistent_objects(url, client):
 )
 def test_permission_denied(url, client):
     response = client.get(
-        url=url, headers={"Authorization": "Token invalid_token"},
+        url=url,
+        headers={"Authorization": "Token invalid_token"},
     )
     assert response.status_code == HTTPStatus.UNAUTHORIZED, f'{url} доступен'
     assert response.json() == {
@@ -26,7 +28,8 @@ def test_permission_denied(url, client):
 
 
 @pytest.mark.parametrize(
-    "url", ['/api/users/', 'api/recipes/', '/api/users/subscriptions/'],
+    "url",
+    ['/api/users/', 'api/recipes/', '/api/users/subscriptions/'],
 )
 def test_paginator(url, client):
     raise NotImplementedError

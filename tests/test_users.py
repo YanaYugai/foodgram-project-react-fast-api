@@ -5,7 +5,11 @@ import random
 import string
 from src.users.schemas import UserCreation
 from src.models import User
-from src.crud.services import create_user, get_object_by_id_or_error, get_objects
+from src.crud.services import (
+    create_user,
+    get_object_by_id_or_error,
+    get_objects,
+)
 
 
 def random_lower_string() -> str:
@@ -36,7 +40,7 @@ def test_change_password(client):
     raise NotImplementedError
 
 
-#def test_get_user_response(client):
+#  def test_get_user_response(client):
 #    response = client.get('/api/users/1/')
 #    assert response.status_code == http.HTTPStatus.OK
 #    assert response.json() == users[1]
@@ -69,7 +73,13 @@ def test_create_user(db: Session) -> None:
     username = random_lower_string()
     first_name = random_lower_string()
     last_name = random_lower_string()
-    user_in = UserCreation(email=email, password=password, username=username, first_name=first_name, last_name=last_name)
+    user_in = UserCreation(
+        email=email,
+        password=password,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+    )
     user = create_user(session=db, data=user_in)
     assert user.email == email
     assert user.username == username
@@ -84,7 +94,13 @@ def test_get_user(client, db: Session) -> None:
     username = random_lower_string()
     first_name = random_lower_string()
     last_name = random_lower_string()
-    user_in = UserCreation(email=email, password=password, username=username, first_name=first_name, last_name=last_name)
+    user_in = UserCreation(
+        email=email,
+        password=password,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+    )
     user = create_user(session=db, data=user_in)
     user_check = get_object_by_id_or_error(user.id, db, User)
     assert user.email == user_check.email
