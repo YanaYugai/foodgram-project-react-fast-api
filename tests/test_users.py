@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, select
 import random
 import string
-from src.users.schemas import UserCreation
-from src.models import User
-from src.crud.services import create_user, get_object_by_id_or_error, get_objects
+from backend.src.users.schemas import UserCreation
+from backend.src.models import User
+from backend.src.crud.services import create_user, get_object_by_id_or_error, get_objects
 
 
 def random_lower_string() -> str:

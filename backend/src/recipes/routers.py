@@ -2,14 +2,7 @@ from fastapi import APIRouter
 from typing import Annotated, List
 from src.recipes.schemas import RecipeCreate, RecipeRead
 from fastapi import Header, HTTPException
-import path
-import sys
-
-
-directory = path.Path(__file__).abspath()
-sys.path.append(directory.parent.parent.parent.parent)
-
-from tests.example_responses import recipes  # noqa: E402
+from src.example_responses import recipes  # noqa: E402
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
 

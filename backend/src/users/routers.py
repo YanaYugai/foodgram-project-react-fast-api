@@ -1,17 +1,10 @@
 from fastapi import APIRouter, HTTPException
-import path
-import sys
-from backend.src.users.schemas import (
+from src.users.schemas import (
     AuthorRead,
     UserCreation,
     UserResponseCreation,
 )
-
-
-directory = path.Path(__file__).abspath()
-sys.path.append(directory.parent.parent.parent.parent)
-
-from tests.example_responses import users  # noqa: E402
+from src.example_responses import users  # noqa: E402
 
 
 router = APIRouter(prefix='/api/users', tags=['users'])

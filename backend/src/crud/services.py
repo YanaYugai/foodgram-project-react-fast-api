@@ -1,7 +1,7 @@
-from src.models import User, Recipe
+from backend.src.models import User, Recipe
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, Depends, Header
+from fastapi import HTTPException
 from http import HTTPStatus
 from src.users.schemas import UserTokenCreation, UserCreation
 from src.recipes.schemas import RecipeCreate

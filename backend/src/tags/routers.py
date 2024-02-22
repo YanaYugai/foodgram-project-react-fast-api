@@ -1,15 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
 from src.tags.schemas import TagsRead
-
-import path
-import sys
-
-
-directory = path.Path(__file__).abspath()
-sys.path.append(directory.parent.parent.parent.parent)
-
-from tests.example_responses import tags  # noqa: E402
+from src.example_responses import tags
 
 router = APIRouter(prefix='/api/tags', tags=['tags'])
 

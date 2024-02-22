@@ -1,14 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
-import path
-import sys
 from src.ingredients.schemas import IngredientsRead
-
-# TODO: from8 to 11 change and delete evryrewhere
-directory = path.Path(__file__).abspath()
-sys.path.append(directory.parent.parent.parent.parent)
-
-from tests.example_responses import ingredients  # noqa: E402
+from src.example_responses import ingredients  # noqa: E402
 
 
 router = APIRouter(prefix="/api/ingredients", tags=["ingredients"])
