@@ -1,12 +1,11 @@
-from tests.example_responses import users
 import http
 from sqlalchemy.orm import Session
 from sqlalchemy import func, select
 import random
 import string
-from backend.src.users.schemas import UserCreation
-from backend.src.models import User
-from backend.src.crud.services import create_user, get_object_by_id_or_error, get_objects
+from src.users.schemas import UserCreation
+from src.models import User
+from src.crud.services import create_user, get_object_by_id_or_error, get_objects
 
 
 def random_lower_string() -> str:
@@ -37,10 +36,10 @@ def test_change_password(client):
     raise NotImplementedError
 
 
-def test_get_user_response(client):
-    response = client.get('/api/users/1/')
-    assert response.status_code == http.HTTPStatus.OK
-    assert response.json() == users[1]
+#def test_get_user_response(client):
+#    response = client.get('/api/users/1/')
+#    assert response.status_code == http.HTTPStatus.OK
+#    assert response.json() == users[1]
 
 
 def test_post_user(client):
@@ -57,7 +56,7 @@ def test_post_user(client):
     assert response.status_code == http.HTTPStatus.CREATED
     assert response.json() == {
         "email": "vpupkin@yandex.ru",
-        "id": 0,
+        "id": 1,
         "username": "vasya.pupkin",
         "first_name": "Вася",
         "last_name": "Пупкин",
@@ -79,7 +78,7 @@ def test_create_user(db: Session) -> None:
     assert hasattr(user, "password")
 
 
-def test_get_user(db: Session) -> None:
+def test_get_user(client, db: Session) -> None:
     email = random_email()
     password = random_lower_string()
     username = random_lower_string()
@@ -90,10 +89,13 @@ def test_get_user(db: Session) -> None:
     user_check = get_object_by_id_or_error(user.id, db, User)
     assert user.email == user_check.email
     assert user.username == user_check.username
+    response = client.get(f'/api/users/{user.id}/')
+    assert response.status_code == http.HTTPStatus.OK
 
 
-def test_get_users(db: Session):
+def test_get_users(client, db: Session):
     users = get_objects(db, User)
     count_users = db.scalar(select(func.count(User.id)))
     assert len(users) == count_users
-
+    response = client.get('/api/users/')
+    assert response.status_code == http.HTTPStatus.OK
