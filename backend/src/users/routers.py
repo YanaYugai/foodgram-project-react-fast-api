@@ -14,7 +14,9 @@ router = APIRouter(prefix='/api/users', tags=['users'])
 
 @router.get('/{user_id}/', response_model=UserResponseCreation)
 def get_user(user_id: int, session: SessionApi):
-    user = services.get_object_by_id_or_error(id=user_id, session=session, model=User)
+    user = services.get_object_by_id_or_error(
+        id=user_id, session=session, model=User
+    )
     return user
 
 

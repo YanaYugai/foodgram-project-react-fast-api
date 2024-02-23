@@ -29,9 +29,11 @@ class IngredientsInRecipe(Base):
     recipe_id: Mapped[recipe_id]
     ingredient_id: Mapped[int] = mapped_column(ForeignKey("ingredient.id"))
     recipe: Mapped['Recipe'] = relationship(
-        'Recipe', back_populates='ingredients_in_recipe',
+        'Recipe',
+        back_populates='ingredients_in_recipe',
     )
     amount: Mapped[int]
+
 
 """
 class RecipeUserMixin:
@@ -50,6 +52,7 @@ class Favorite(RecipeUserMixin, Base):
     __tablename__ = 'favorite'
 """
 
+
 class Recipe(Base):
     __tablename__ = 'recipe'
 
@@ -66,7 +69,8 @@ class Recipe(Base):
         back_populates="recipes",
     )
     ingredients_in_recipe: Mapped[List['IngredientsInRecipe']] = relationship(
-        'IngredientsInRecipe', back_populates='recipe',
+        'IngredientsInRecipe',
+        back_populates='recipe',
     )
     ingredients: Mapped[List['Ingredient']] = relationship(
         secondary='ingredientsinrecipe',
@@ -125,6 +129,8 @@ class User(Base):
     first_name: Mapped[str150]
     last_name: Mapped[str150]
     password: Mapped[str150]
+
+
 """
     recipes: Mapped[List["Recipe"]] = relationship(
         'Recipe', back_populates='author', cascade="all, delete-orphan",

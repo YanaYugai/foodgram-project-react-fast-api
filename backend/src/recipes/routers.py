@@ -20,7 +20,6 @@ def create_recipe(
             status_code=401,
             detail="Учетные данные не были предоставлены.",
         )
-    
     return recipes.get(1)
 
 

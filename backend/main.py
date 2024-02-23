@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, status, Depends
+from fastapi import FastAPI, Request, status
 from src.recipes import routers as recipes
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
