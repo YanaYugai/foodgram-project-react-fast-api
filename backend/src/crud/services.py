@@ -1,4 +1,4 @@
-from src.models import User, Recipe
+from backend.src.models import User, Recipe
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from fastapi import HTTPException

@@ -2,12 +2,23 @@ from fastapi.testclient import TestClient
 from pytest import fixture
 from typing import Generator
 from sqlalchemy.orm import sessionmaker
-from main import app
-from database import engine, Base
+from backend.src.users.schemas import UserCreation
+from backend.main import app
+from backend.database import engine, Base
 from sqlalchemy.sql import text
+import random
+import string
 
 
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def random_lower_string() -> str:
+    return "".join(random.choices(string.ascii_lowercase, k=32))
+
+
+def random_email() -> str:
+    return f"{random_lower_string()}@{random_lower_string()}.com"
 
 
 @fixture(scope="session")
@@ -30,3 +41,20 @@ def clear_tables(session) -> Generator:
 def client() -> Generator:
     with TestClient(app) as c:
         yield c
+
+
+@fixture(scope="function")
+def user_data() -> UserCreation:
+    email = random_email()
+    password = random_lower_string()
+    username = random_lower_string()
+    first_name = random_lower_string()
+    last_name = random_lower_string()
+    user_in = UserCreation(
+        email=email,
+        password=password,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+    )
+    return user_in

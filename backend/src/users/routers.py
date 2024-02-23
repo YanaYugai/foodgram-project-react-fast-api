@@ -5,7 +5,7 @@ from src.users.schemas import (
 )
 from database import SessionApi
 from src.crud import services
-from src.models import User
+from backend.src.models import User
 from typing import List
 
 
