@@ -16,8 +16,7 @@ services:
       - pg_data:/var/lib/postgresql/data
   backend:
     build: ../backend/
-    command: sh -c "alembic revision --autogenerate&&
-                    alembic upgrade head &&
+    command: sh -c "alembic upgrade head &&
                     uvicorn main:app --proxy-headers --host 0.0.0.0 --port 8000"
     depends_on:
       - db
