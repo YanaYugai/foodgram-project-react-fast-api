@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, select
 import random
 import string
-from src.users.schemas import UserCreation
-from src.models import User
-from src.crud.services import (
+from backend.src.users.schemas import UserCreation
+from backend.src.models import User
+from backend.src.crud.services import (
     create_user,
     get_object_by_id_or_error,
     get_objects,
@@ -40,12 +40,6 @@ def test_change_password(client):
     raise NotImplementedError
 
 
-#  def test_get_user_response(client):
-#    response = client.get('/api/users/1/')
-#    assert response.status_code == http.HTTPStatus.OK
-#    assert response.json() == users[1]
-
-
 def test_post_user(client):
     response = client.post(
         '/api/users/',
@@ -67,7 +61,7 @@ def test_post_user(client):
     }
 
 
-def test_create_user(clear_tables) -> None:
+def test_create_user(clear_tables: Session) -> None:
     email = random_email()
     password = random_lower_string()
     username = random_lower_string()
@@ -88,7 +82,7 @@ def test_create_user(clear_tables) -> None:
     assert hasattr(user, "password")
 
 
-def test_get_user(client, clear_tables) -> None:
+def test_get_user(client, clear_tables: Session) -> None:
     email = random_email()
     password = random_lower_string()
     username = random_lower_string()
@@ -109,7 +103,7 @@ def test_get_user(client, clear_tables) -> None:
     assert response.status_code == http.HTTPStatus.OK
 
 
-def test_get_users(client, clear_tables):
+def test_get_users(client, clear_tables: Session):
     users = get_objects(clear_tables, User)
     count_users = clear_tables.scalar(select(func.count(User.id)))
     assert len(users) == count_users
