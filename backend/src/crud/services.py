@@ -31,7 +31,7 @@ def create_token_or_error(session: Session, data: UserTokenCreation):
         raise HTTPException(status_code=400, detail='Некорректные данные.')
     if user.password != password:
         raise HTTPException(status_code=400, detail='Некорректные данные.')
-    #return generate_token(user)
+    #  return generate_token(user)
 
 
 def create_user(session: Session, data: UserCreation) -> Any:
@@ -51,8 +51,6 @@ def create_recipe(session: Session, data: RecipeCreate) -> Recipe:
     session.add(recipe)
     session.commit()
     return recipe
-
-# def create_post(token: str = Depends(get), Authorization: Annotated[str, Header()]):
 
 
 def delete_object(

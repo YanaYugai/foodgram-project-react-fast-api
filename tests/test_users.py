@@ -30,7 +30,10 @@ def test_change_password(client):
     raise NotImplementedError
 
 
-def test_create_user(clear_tables: Session, user_data: UserCreation) -> None:
+def test_create_user(
+    clear_tables: Session,
+    user_data: UserCreation,
+) -> None:
     user = create_user(session=clear_tables, data=user_data)
     assert user.email == user_data.email
     assert user.username == user_data.username
@@ -39,7 +42,11 @@ def test_create_user(clear_tables: Session, user_data: UserCreation) -> None:
     assert hasattr(user, "password")
 
 
-def test_get_user(client, clear_tables: Session, user_data: UserCreation) -> None:
+def test_get_user(
+    client,
+    clear_tables: Session,
+    user_data: UserCreation,
+) -> None:
     user = create_user(session=clear_tables, data=user_data)
     user_check = get_object_by_id_or_error(user.id, clear_tables, User)
     assert user.email == user_check.email
@@ -48,7 +55,10 @@ def test_get_user(client, clear_tables: Session, user_data: UserCreation) -> Non
     assert response.status_code == http.HTTPStatus.OK
 
 
-def test_get_users(client, clear_tables: Session) -> None:
+def test_get_users(
+    client,
+    clear_tables: Session,
+) -> None:
     users = get_objects(clear_tables, User)
     count_users = clear_tables.scalar(select(func.count(User.id)))
     assert len(users) == count_users
