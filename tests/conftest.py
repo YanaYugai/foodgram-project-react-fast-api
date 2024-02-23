@@ -10,20 +10,20 @@ from sqlalchemy.sql import text
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def clear_tables():
-    with TestSession() as conn:
-        for table in Base.metadata.sorted_tables:
-            conn.execute(
-                text(f'TRUNCATE "{table.name}" RESTART IDENTITY CASCADE;'),
-            )
-        conn.commit()
-
-
 @fixture(scope="session")
-def db() -> Generator:
+def session() -> Generator:
     with TestSession() as session:
         yield session
-    clear_tables()
+
+
+@fixture(scope="function")
+def clear_tables(session) -> Generator:
+    yield session
+    for table in Base.metadata.sorted_tables:
+        session.execute(
+            text(f'TRUNCATE "{table.name}" RESTART IDENTITY CASCADE;'),
+        )
+    session.commit()
 
 
 @fixture(scope="module")

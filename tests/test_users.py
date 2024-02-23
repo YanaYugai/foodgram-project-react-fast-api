@@ -67,7 +67,7 @@ def test_post_user(client):
     }
 
 
-def test_create_user(db: Session) -> None:
+def test_create_user(clear_tables) -> None:
     email = random_email()
     password = random_lower_string()
     username = random_lower_string()
@@ -80,7 +80,7 @@ def test_create_user(db: Session) -> None:
         first_name=first_name,
         last_name=last_name,
     )
-    user = create_user(session=db, data=user_in)
+    user = create_user(session=clear_tables, data=user_in)
     assert user.email == email
     assert user.username == username
     assert user.first_name == first_name
@@ -88,7 +88,7 @@ def test_create_user(db: Session) -> None:
     assert hasattr(user, "password")
 
 
-def test_get_user(client, db: Session) -> None:
+def test_get_user(client, clear_tables) -> None:
     email = random_email()
     password = random_lower_string()
     username = random_lower_string()
@@ -101,17 +101,17 @@ def test_get_user(client, db: Session) -> None:
         first_name=first_name,
         last_name=last_name,
     )
-    user = create_user(session=db, data=user_in)
-    user_check = get_object_by_id_or_error(user.id, db, User)
+    user = create_user(session=clear_tables, data=user_in)
+    user_check = get_object_by_id_or_error(user.id, clear_tables, User)
     assert user.email == user_check.email
     assert user.username == user_check.username
     response = client.get(f'/api/users/{user.id}/')
     assert response.status_code == http.HTTPStatus.OK
 
 
-def test_get_users(client, db: Session):
-    users = get_objects(db, User)
-    count_users = db.scalar(select(func.count(User.id)))
+def test_get_users(client, clear_tables):
+    users = get_objects(clear_tables, User)
+    count_users = clear_tables.scalar(select(func.count(User.id)))
     assert len(users) == count_users
     response = client.get('/api/users/')
     assert response.status_code == http.HTTPStatus.OK
