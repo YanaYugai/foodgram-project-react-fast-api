@@ -6,16 +6,17 @@ from http import HTTPStatus
 from src.users.schemas import UserTokenCreation, UserCreation
 from src.recipes.schemas import RecipeCreate
 from database import Base
+from typing import List, Any
 
 
-def get_object_by_id_or_error(id: int, session: Session, model: Base):
+def get_object_by_id_or_error(id: int, session: Session, model: Base) -> Any:
     obj = session.get(model, id)
     if obj is None:
         raise HTTPException(status_code=404, detail='Страница не найдена.')
     return obj
 
 
-def get_objects(session: Session, model: Base):
+def get_objects(session: Session, model: Base) -> List[Base]:
     statement = select(model)
     objects = session.scalars(statement).all()
     return objects
@@ -33,7 +34,7 @@ def create_token_or_error(session: Session, data: UserTokenCreation):
     #return generate_token(user)
 
 
-def create_user(session: Session, data: UserCreation):
+def create_user(session: Session, data: UserCreation) -> Any:
     username = data.username
     statement = select(User).where(User.username == username)
     user = session.scalar(statement)
@@ -45,7 +46,7 @@ def create_user(session: Session, data: UserCreation):
     return user
 
 
-def create_recipe(session: Session, data: RecipeCreate):
+def create_recipe(session: Session, data: RecipeCreate) -> Recipe:
     recipe = Recipe(data)
     session.add(recipe)
     session.commit()
@@ -58,7 +59,7 @@ def delete_object(
     session: Session,
     id: int,
     model: Base,
-):
+) -> Any:
     obj = get_object_by_id_or_error(id, session, model)
     session.delete(obj)
     session.commit()
