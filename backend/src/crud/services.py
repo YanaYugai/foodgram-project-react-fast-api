@@ -9,7 +9,10 @@ from database import Base
 from typing import List, Any
 
 
-def get_object_by_id_or_error(id: int, session: Session, model: Base) -> Any:
+def get_object_by_id_or_error(
+    id: int, session: Session,
+    model: Base,
+) -> Any:
     obj = session.get(model, id)
     if obj is None:
         raise HTTPException(status_code=404, detail='Страница не найдена.')
