@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException
 from typing import List
-from src.tags.schemas import TagsRead
+
+from fastapi import APIRouter, HTTPException
+
 from src.example_responses import tags
+from src.tags.schemas import TagsRead
 
 router = APIRouter(prefix='/api/tags', tags=['tags'])
 

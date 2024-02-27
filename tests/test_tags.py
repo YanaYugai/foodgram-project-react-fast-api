@@ -1,5 +1,6 @@
-from tests.example_responses import tags
 import http
+
+from tests.example_responses import tags
 
 
 def test_get_tags(client):

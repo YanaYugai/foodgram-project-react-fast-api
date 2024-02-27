@@ -1,6 +1,6 @@
-from tests.example_responses import recipes
 import http
 
+from tests.example_responses import recipes
 
 dict_1 = {
     "ingredients": [{"id": 1, "amount": 10}],

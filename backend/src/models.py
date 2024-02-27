@@ -1,8 +1,9 @@
-from database import Base
-from sqlalchemy import String, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship, mapped_column, Mapped
-from typing import List, Annotated
+from typing import Annotated, List
 
+from sqlalchemy import ForeignKey, String, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from database import Base
 
 str150_unique = Annotated[str, mapped_column(String(150), unique=True)]
 str150 = Annotated[str, mapped_column(String(150))]
@@ -141,5 +142,7 @@ class User(Base):
     recipes_in_cart: Mapped[List['Recipe']] = relationship(
         'Recipe', secondary=lambda: Cart, back_populates='in_cart',
     )
-    # followers: Mapped[List['User']] = relationship(secondary=lambda: Follow, back_populates='')
+    # followers: Mapped[List['User']] = relationship(
+        secondary=lambda: Follow, back_populates='',
+    )
 """

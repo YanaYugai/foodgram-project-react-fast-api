@@ -1,13 +1,15 @@
 import http
-from sqlalchemy.orm import Session
+
 from sqlalchemy import func, select
-from backend.src.users.schemas import UserCreation
-from backend.src.models import User
+from sqlalchemy.orm import Session
+
 from backend.src.crud.services import (
     create_user,
     get_object_by_id_or_error,
     get_objects,
 )
+from backend.src.models import User
+from backend.src.users.schemas import UserCreation
 
 
 def test_get_users_response(client):

@@ -1,5 +1,6 @@
-from tests.example_responses import ingredients
 import http
+
+from tests.example_responses import ingredients
 
 
 def test_get_ingredients(client):

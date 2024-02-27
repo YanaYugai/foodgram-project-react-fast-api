@@ -1,12 +1,14 @@
-from backend.src.models import User, Recipe
+from http import HTTPStatus
+from typing import Any, List
+
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
-from http import HTTPStatus
-from src.users.schemas import UserTokenCreation, UserCreation
-from src.recipes.schemas import RecipeCreate
+
+from backend.src.models import Recipe, User
 from database import Base
-from typing import List, Any
+from src.recipes.schemas import RecipeCreate
+from src.users.schemas import UserCreation, UserTokenCreation
 
 
 def get_object_by_id_or_error(

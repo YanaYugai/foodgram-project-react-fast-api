@@ -1,8 +1,9 @@
-from fastapi import APIRouter
 from typing import Annotated, List
-from src.recipes.schemas import RecipeCreate, RecipeRead
-from fastapi import Header, HTTPException
+
+from fastapi import APIRouter, Header, HTTPException
+
 from src.example_responses import recipes  # noqa: E402
+from src.recipes.schemas import RecipeCreate, RecipeRead
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
 

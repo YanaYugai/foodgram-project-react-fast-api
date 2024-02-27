@@ -1,14 +1,15 @@
-from fastapi.testclient import TestClient
-from pytest import fixture
-from typing import Generator
-from sqlalchemy.orm import sessionmaker
-from backend.src.users.schemas import UserCreation
-from backend.main import app
-from backend.database import engine, Base
-from sqlalchemy.sql import text
 import random
 import string
+from typing import Generator
 
+from fastapi.testclient import TestClient
+from pytest import fixture
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import text
+
+from backend.database import Base, engine
+from backend.main import app
+from backend.src.users.schemas import UserCreation
 
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

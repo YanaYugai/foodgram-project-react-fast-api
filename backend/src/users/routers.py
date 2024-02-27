@@ -1,13 +1,11 @@
-from fastapi import APIRouter
-from src.users.schemas import (
-    UserCreation,
-    UserResponseCreation,
-)
-from database import SessionApi
-from src.crud import services
-from backend.src.models import User
 from typing import List
 
+from fastapi import APIRouter
+
+from backend.src.models import User
+from database import SessionApi
+from src.crud import services
+from src.users.schemas import UserCreation, UserResponseCreation
 
 router = APIRouter(prefix='/api/users', tags=['users'])
 
