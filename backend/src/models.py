@@ -15,7 +15,7 @@ recipe_id = Annotated[int, mapped_column(ForeignKey("recipe.id"))]
 
 class TagsInRecipe(Base):
     __tablename__ = 'tagsinrecipe'
-    __table_args__ = (UniqueConstraint('recipe_id', 'tag_id'),)
+    __table_args__ = (UniqueConstraint("recipe_id", "tag_id"),)
 
     id: Mapped[intpk] = mapped_column(init=False)
     recipe_id: Mapped[recipe_id]
@@ -23,22 +23,21 @@ class TagsInRecipe(Base):
 
 
 class IngredientsInRecipe(Base):
-    __tablename__ = 'ingredientsinrecipe'
-    __table_args__ = (UniqueConstraint('recipe_id', 'ingredient_id'),)
+    __tablename__ = "ingredientsinrecipe"
+    __table_args__ = (UniqueConstraint("recipe_id", "ingredient_id"),)
 
     id: Mapped[intpk] = mapped_column(init=False)
     recipe_id: Mapped[recipe_id]
     ingredient_id: Mapped[int] = mapped_column(ForeignKey("ingredient.id"))
-    recipe: Mapped['Recipe'] = relationship(
-        'Recipe',
-        back_populates='ingredients_in_recipe',
+    recipe: Mapped["Recipe"] = relationship(
+        "Recipe",
+        back_populates="ingredients_in_recipe",
     )
     amount: Mapped[int]
 
 
-"""
 class RecipeUserMixin:
-    __table_args__ = (UniqueConstraint('recipe_id', 'user_id'),)
+    __table_args__ = (UniqueConstraint("recipe_id", "user_id"),)
 
     id: Mapped[intpk] = mapped_column(init=False)
     recipe_id: Mapped[recipe_id]
@@ -46,16 +45,15 @@ class RecipeUserMixin:
 
 
 class Cart(RecipeUserMixin, Base):
-    __tablename__ = 'cart'
+    __tablename__ = "cart"
 
 
 class Favorite(RecipeUserMixin, Base):
-    __tablename__ = 'favorite'
-"""
+    __tablename__ = "favorite"
 
 
 class Recipe(Base):
-    __tablename__ = 'recipe'
+    __tablename__ = "recipe"
 
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(255))
@@ -65,17 +63,17 @@ class Recipe(Base):
     cooking_time: Mapped[int]
     # author: Mapped["User"] = relationship('User', back_populates="recipes")
     tags: Mapped[List["Tag"]] = relationship(
-        'Tag',
-        secondary='tagsinrecipe',
+        "Tag",
+        secondary="tagsinrecipe",
         back_populates="recipes",
     )
-    ingredients_in_recipe: Mapped[List['IngredientsInRecipe']] = relationship(
-        'IngredientsInRecipe',
-        back_populates='recipe',
+    ingredients_in_recipe: Mapped[List["IngredientsInRecipe"]] = relationship(
+        "IngredientsInRecipe",
+        back_populates="recipe",
     )
-    ingredients: Mapped[List['Ingredient']] = relationship(
-        secondary='ingredientsinrecipe',
-        back_populates='recipes',
+    ingredients: Mapped[List["Ingredient"]] = relationship(
+        secondary="ingredientsinrecipe",
+        back_populates="recipes",
     )
     # in_favorite: Mapped[List['User']] = relationship(
     #    secondary=lambda: Favorite, back_populates='recipes_in_favorite',
@@ -86,29 +84,29 @@ class Recipe(Base):
 
 
 class Tag(Base):
-    __tablename__ = 'tag'
+    __tablename__ = "tag"
 
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str200]
     color: Mapped[str] = mapped_column(String(7))
     slug: Mapped[str] = mapped_column(String(200), unique=True)
     recipes: Mapped[List["Recipe"]] = relationship(
-        'Recipe',
-        secondary='tagsinrecipe',
+        "Recipe",
+        secondary="tagsinrecipe",
         back_populates="tags",
     )
 
 
 class Ingredient(Base):
-    __tablename__ = 'ingredient'
+    __tablename__ = "ingredient"
 
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str200]
     measurement_unit: Mapped[str200]
-    recipes: Mapped[List['Recipe']] = relationship(
-        'Recipe',
-        secondary='ingredientsinrecipe',
-        back_populates='ingredients',
+    recipes: Mapped[List["Recipe"]] = relationship(
+        "Recipe",
+        secondary="ingredientsinrecipe",
+        back_populates="ingredients",
     )
 
 
@@ -122,7 +120,7 @@ class Ingredient(Base):
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
     id: Mapped[intpk] = mapped_column(init=False)
     email: Mapped[str150_unique]
