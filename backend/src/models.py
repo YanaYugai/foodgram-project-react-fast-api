@@ -14,7 +14,7 @@ recipe_id = Annotated[int, mapped_column(ForeignKey("recipe.id"))]
 
 
 class TagsInRecipe(Base):
-    __tablename__ = 'tagsinrecipe'
+    __tablename__ = "tagsinrecipe"
     __table_args__ = (UniqueConstraint("recipe_id", "tag_id"),)
 
     id: Mapped[intpk] = mapped_column(init=False)
