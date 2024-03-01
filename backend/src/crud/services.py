@@ -6,13 +6,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.src.models import Recipe, User
-from database import Base
+from database import Base, SessionApi
 from src.recipes.schemas import RecipeCreate
 from src.users.schemas import UserCreation, UserTokenCreation
 
 
 def get_object_by_id_or_error(
-    id: int, session: Session,
+    id: int,
+    session: Session,
     model: Base,
 ) -> Any:
     obj = session.get(model, id)
@@ -67,3 +68,11 @@ def delete_object(
     session.delete(obj)
     session.commit()
     return HTTPStatus.NO_CONTENT
+
+
+def check_token(session: SessionApi, token: str) -> User:
+    statement = select(User).where(User.token == token)
+    user = session.scalar(statement)
+    if user is None:
+        raise HTTPException(status_code=400, detail='Некорректные данные.')
+    return user
