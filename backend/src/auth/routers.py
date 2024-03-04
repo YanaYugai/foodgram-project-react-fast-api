@@ -27,13 +27,13 @@ class OAuth2PasswordToken(OAuth2PasswordBearer):
         return param
 
 
-router = APIRouter(prefix='/api/token', tags=['users'])
+router = APIRouter(prefix='/api/token', tags=['token'])
 
 oauth2_scheme = OAuth2PasswordToken(tokenUrl="api/token/login/")
 
 
 @router.post("/login/")
-async def login(
+def login(
     session: SessionApi,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):

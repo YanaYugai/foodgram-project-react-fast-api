@@ -36,6 +36,7 @@ class IngredientsInRecipe(Base):
     amount: Mapped[int]
 
 
+"""
 class RecipeUserMixin:
     __table_args__ = (UniqueConstraint("recipe_id", "user_id"),)
 
@@ -50,6 +51,7 @@ class Cart(RecipeUserMixin, Base):
 
 class Favorite(RecipeUserMixin, Base):
     __tablename__ = "favorite"
+"""
 
 
 class Recipe(Base):
