@@ -1,6 +1,6 @@
 from typing import Annotated, List
 
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Depends
 
 from backend.src.models import User
 from database import SessionApi
@@ -21,12 +21,8 @@ def get_user(user_id: int, session: SessionApi):
 
 
 @router.get('/me/', response_model=UserResponseCreation)
-def get_me(
-    session: SessionApi,
-    Authorization: Annotated[str, Header()],
-):
-    user = services.check_token(session, Authorization)
-    return user
+def get_me(current_user: Annotated[User, Depends(services.get_current_user)]):
+    return current_user
 
 
 @router.post('/', response_model=UserResponseCreation, status_code=201)
