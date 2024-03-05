@@ -132,6 +132,13 @@ class User(Base):
     password: Mapped[str150]
 
 
+class Token(Base):
+    __tablename__ = "token"
+
+    access_token: Mapped[str]
+    token_type: Mapped[str] = "bearer"
+
+
 """
     recipes: Mapped[List["Recipe"]] = relationship(
         'Recipe', back_populates='author', cascade="all, delete-orphan",
