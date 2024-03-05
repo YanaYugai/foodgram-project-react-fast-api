@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 from database import SessionApi
-from src.crud.services import get_user_by_email
+from src.crud.services import delete_token, get_object_by_email_or_error
 
 
 class OAuth2PasswordToken(OAuth2PasswordBearer):
@@ -37,5 +37,17 @@ def login(
     session: SessionApi,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
-    user = get_user_by_email(session=session, data=form_data)
+    user = get_object_by_email_or_error(
+        session=session,
+        email=form_data.email,
+        password=form_data.password,
+    )
     return {"access_token": user.username, "token_type": "bearer"}
+
+
+@router.delete("/logout/", status_code=204)
+def logout(
+    session: SessionApi,
+    token: Annotated[str, Depends(oauth2_scheme)],
+):
+    delete_token(session=session, token=token)
