@@ -42,7 +42,11 @@ def login(
         email=form_data.email,
         password=form_data.password,
     )
-    return {"access_token": user.username, "token_type": "bearer"}
+    return {
+        "access_token": user.username,
+        "token_type": "bearer",
+        "auth_token": "string",
+    }
 
 
 @router.delete("/logout/", status_code=204)
