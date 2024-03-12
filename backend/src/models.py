@@ -129,7 +129,7 @@ class User(Base):
     username: Mapped[str150_unique]
     first_name: Mapped[str150]
     last_name: Mapped[str150]
-    password: Mapped[str150]
+    hashed_password: Mapped[str150]
 
 
 class Token(Base):

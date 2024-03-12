@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.src.auth.utils import get_password_hash, verify_password
 from backend.src.models import Token, User  # type: ignore
 from database import Base
 from src.auth.routers import oauth2_scheme
@@ -18,10 +19,9 @@ def get_object_by_id_or_error(id: int, session: Session, model: Base):
     return obj
 
 
-def get_object_by_email_or_error(email: str, password: str, session: Session):
+def get_object_by_email_or_error(email: str, session: Session):
     statement = select(User).where(
         User.email == email,
-        User.password == password,
     )
     user = session.scalar(statement)
     if user is None:
@@ -41,6 +41,8 @@ def create_user(session: Session, data: UserCreation):
     user = session.scalar(statement)
     if user is not None:
         raise HTTPException(status_code=400, detail='Некорректные данные.')
+    hashed_password = get_password_hash(data.password)
+    data.password = hashed_password
     user = User(**data.model_dump())
     session.add(user)
     session.commit()
@@ -80,3 +82,10 @@ def delete_token(
     session.delete(token)
     session.commit()
     return HTTPStatus.NO_CONTENT
+
+
+def authenticate_user(session: Session, email: str, password: str):
+    user = get_object_by_email_or_error(session=session, email=email)
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
