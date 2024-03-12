@@ -19,16 +19,6 @@ def get_object_by_id_or_error(id: int, session: Session, model: Base):
     return obj
 
 
-def get_object_by_email_or_error(email: str, session: Session):
-    statement = select(User).where(
-        User.email == email,
-    )
-    user = session.scalar(statement)
-    if user is None:
-        raise HTTPException(status_code=404, detail='Страница не найдена.')
-    return user
-
-
 def get_objects(session: Session, model: Base):
     statement = select(model)
     objects = session.scalars(statement).all()
@@ -85,7 +75,12 @@ def delete_token(
 
 
 def authenticate_user(session: Session, email: str, password: str):
-    user = get_object_by_email_or_error(session=session, email=email)
-    if not verify_password(password, user.hashed_password):
+    statement = select(User).where(
+        User.email == email,
+    )
+    user = session.scalar(statement)
+    if user is None:
+        return False
+    if not verify_password(password, user.password):
         return False
     return user
