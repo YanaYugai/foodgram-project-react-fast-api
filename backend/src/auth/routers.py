@@ -1,14 +1,24 @@
+import os
+from datetime import datetime, timedelta, timezone
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends
+from auth.utils import create_access_token
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.security.utils import get_authorization_scheme_param
+from models import Token
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 from database import SessionApi
-from src.crud.services import delete_token, get_object_by_email_or_error
+from src.crud.services import authenticate_user, delete_token
+
+load_dotenv()
+
+
+MINUTES = os.getenv('MINUTES')
 
 
 class OAuth2PasswordToken(OAuth2PasswordBearer):
@@ -37,16 +47,27 @@ def login(
     session: SessionApi,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
-    user = get_object_by_email_or_error(
+    user = authenticate_user(
         session=session,
         email=form_data.email,
         password=form_data.password,
     )
-    return {
-        "access_token": user.username,
-        "token_type": "bearer",
-        "auth_token": "string",
-    }
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if MINUTES is None:
+        raise ValueError
+    expire = datetime.now(timezone.utc) + timedelta(minutes=int(MINUTES))
+    token = Token(
+        access_token=create_access_token(
+            subject=user.id,
+            expires_delta=expire,
+        ),
+    )
+    return token
 
 
 @router.delete("/logout/", status_code=204)
