@@ -136,7 +136,6 @@ class Token(Base):
     __tablename__ = "token"
 
     access_token: Mapped[str]
-    auth_token: Mapped[str]
     token_type: Mapped[str] = "bearer"
 
 

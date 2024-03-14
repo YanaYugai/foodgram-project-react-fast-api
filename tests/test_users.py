@@ -12,10 +12,6 @@ from backend.src.models import User
 from backend.src.users.schemas import UserCreation
 
 
-def test_get_users_response(client):
-    raise NotImplementedError
-
-
 def test_get_profile(client):
     raise NotImplementedError
 

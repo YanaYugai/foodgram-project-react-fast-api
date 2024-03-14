@@ -2,6 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Optional
 
+from auth.schemas import TokenCreation
 from auth.utils import create_access_token
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, status
@@ -42,7 +43,7 @@ router = APIRouter(prefix='/api/token', tags=['token'])
 oauth2_scheme = OAuth2PasswordToken(tokenUrl="api/token/login/")
 
 
-@router.post("/login/")
+@router.post("/login/", response_model=TokenCreation)
 def login(
     session: SessionApi,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -67,7 +68,7 @@ def login(
             expires_delta=expire,
         ),
     )
-    return token
+    return {**token, 'auth_token': token.access_token}
 
 
 @router.delete("/logout/", status_code=204)
