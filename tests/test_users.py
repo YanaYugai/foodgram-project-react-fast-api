@@ -31,11 +31,36 @@ def test_authenticate_user(
     assert authenticated_user
 
 
-def test_create_token(
+def test_get_access_token(
+    client,
     clear_tables: Session,
     user_data: UserCreation,
-):
-    raise NotImplementedError
+) -> None:
+    user = create_user(session=clear_tables, data=user_data)
+    login_data = {
+        "username": user.email,
+        "password": user.password,
+    }
+    response = client.post('api/token/login/', data=login_data)
+    tokens = response.json()
+    assert response.status_code == 200
+    assert "access_token" in tokens
+    assert "auth_token" in tokens
+    assert tokens["access_token"]
+
+
+def test_get_access_token_incorrect_password(
+    client,
+    clear_tables: Session,
+    user_data: UserCreation,
+) -> None:
+    user = create_user(session=clear_tables, data=user_data)
+    login_data = {
+        "username": user.email,
+        "password": "invalid_password",
+    }
+    r = client.post('api/token/login/', data=login_data)
+    assert r.status_code == 400
 
 
 def test_delete_token(client):
