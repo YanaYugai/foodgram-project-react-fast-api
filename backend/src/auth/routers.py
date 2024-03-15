@@ -50,13 +50,13 @@ def login(
 ):
     user = authenticate_user(
         session=session,
-        email=form_data.email,
+        email=form_data.username,
         password=form_data.password,
     )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     if MINUTES is None:

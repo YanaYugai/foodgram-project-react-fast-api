@@ -4,6 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.src.crud.services import (
+    authenticate_user,
     create_user,
     get_object_by_id_or_error,
     get_objects,
@@ -12,11 +13,28 @@ from backend.src.models import User
 from backend.src.users.schemas import UserCreation
 
 
-def test_get_profile(client):
+def test_get_profile(
+    clear_tables: Session,
+    user_data: UserCreation,
+) -> None:
     raise NotImplementedError
 
 
-def test_create_token(client):
+def test_authenticate_user(
+    clear_tables: Session,
+    user_data: UserCreation,
+) -> None:
+    user = create_user(session=clear_tables, data=user_data)
+    authenticated_user = authenticate_user(
+        session=clear_tables, email=user.email, password=user.password
+    )
+    assert authenticated_user
+
+
+def test_create_token(
+    clear_tables: Session,
+    user_data: UserCreation,
+):
     raise NotImplementedError
 
 
