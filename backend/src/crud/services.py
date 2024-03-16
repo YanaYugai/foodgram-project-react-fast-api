@@ -5,11 +5,14 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from backend.src.auth.utils import get_password_hash, verify_password
+from backend.src.auth.utils import (
+    get_password_hash,
+    oauth2_scheme,
+    verify_password,
+)
 from backend.src.models import Token, User  # type: ignore
+from backend.src.users.schemas import UserCreation
 from database import Base
-from src.auth.routers import oauth2_scheme
-from src.users.schemas import UserCreation
 
 
 def get_object_by_id_or_error(id: int, session: Session, model: Base):

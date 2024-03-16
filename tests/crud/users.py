@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from backend.src.crud.services import create_user
+from backend.backend.src.crud.services import create_user
 
 
 def get_token(client: TestClient, email: str, password: str):

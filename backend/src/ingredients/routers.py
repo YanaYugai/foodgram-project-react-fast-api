@@ -2,8 +2,8 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException
 
-from src.example_responses import ingredients  # noqa: E402
-from src.ingredients.schemas import IngredientsRead
+from backend.src.example_responses import ingredients  # noqa: E402
+from backend.src.ingredients.schemas import IngredientsRead
 
 router = APIRouter(prefix="/api/ingredients", tags=["ingredients"])
 
