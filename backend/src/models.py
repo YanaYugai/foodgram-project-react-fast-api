@@ -3,7 +3,7 @@ from typing import Annotated, List
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base
+from backend.database import Base
 
 str150_unique = Annotated[str, mapped_column(String(150), unique=True)]
 str150 = Annotated[str, mapped_column(String(150))]
@@ -135,6 +135,7 @@ class User(Base):
 class Token(Base):
     __tablename__ = "token"
 
+    id: Mapped[intpk] = mapped_column(init=False)
     access_token: Mapped[str]
     token_type: Mapped[str] = "bearer"
 
