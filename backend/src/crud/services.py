@@ -35,8 +35,9 @@ def create_user(session: Session, data: UserCreation):
     if user is not None:
         raise HTTPException(status_code=400, detail='Некорректные данные.')
     hashed_password = get_password_hash(data.password)
-    data.password = hashed_password
-    user = User(**data.model_dump())
+    data_new = data.model_copy()
+    data_new.password = hashed_password
+    user = User(**data_new.model_dump())
     session.add(user)
     session.commit()
     return user
@@ -85,5 +86,6 @@ def authenticate_user(session: Session, email: str, password: str):
     if user is None:
         return False
     if not verify_password(password, user.password):
+        print(password, user.password, "verify_password")
         return False
     return user

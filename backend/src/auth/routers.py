@@ -53,7 +53,11 @@ def login(
             expires_delta=expire,
         ),
     )
-    return {**token, 'auth_token': token.access_token}
+    return {
+        'access_token': token.access_token,
+        'token_type': token.token_type,
+        'auth_token': token.access_token,
+    }
 
 
 @router.delete("/logout/", status_code=204)
