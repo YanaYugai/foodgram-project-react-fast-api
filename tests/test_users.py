@@ -26,7 +26,9 @@ def test_authenticate_user(
 ) -> None:
     user = create_user(session=clear_tables, data=user_data)
     authenticated_user = authenticate_user(
-        session=clear_tables, email=user.email, password=user.password
+        session=clear_tables,
+        email=user.email,
+        password=user_data.password,
     )
     assert authenticated_user
 
@@ -39,7 +41,7 @@ def test_get_access_token(
     user = create_user(session=clear_tables, data=user_data)
     login_data = {
         "username": user.email,
-        "password": user.password,
+        "password": user_data.password,
     }
     response = client.post('api/token/login/', data=login_data)
     tokens = response.json()
@@ -60,7 +62,7 @@ def test_get_access_token_incorrect_password(
         "password": "invalid_password",
     }
     r = client.post('api/token/login/', data=login_data)
-    assert r.status_code == 400
+    assert r.status_code == 401
 
 
 def test_delete_token(client):
