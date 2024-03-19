@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from backend.src.crud.services import (
     authenticate_user,
     create_user,
+    get_current_user,
     get_object_by_id_or_error,
     get_objects,
 )
@@ -14,10 +15,26 @@ from backend.src.users.schemas import UserCreation
 
 
 def test_get_profile(
+    client,
     clear_tables: Session,
     user_data: UserCreation,
 ) -> None:
-    raise NotImplementedError
+    user = create_user(session=clear_tables, data=user_data)
+    login_data = {
+        "username": user.email,
+        "password": user_data.password,
+    }
+    response = client.post('api/token/login/', data=login_data)
+    tokens = response.json()
+    print(tokens)
+    user = get_current_user(
+        session=clear_tables,  # type: ignore
+        token=tokens["access_token"],
+    )
+    assert user.email == user_data.email
+    assert user.username == user_data.username
+    assert user.first_name == user_data.first_name
+    assert user.last_name == user_data.last_name
 
 
 def test_authenticate_user(
