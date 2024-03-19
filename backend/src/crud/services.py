@@ -57,14 +57,6 @@ def delete_object_by_id(
     return HTTPStatus.NO_CONTENT
 
 
-def fake_decode_token(token):
-    return User(
-        username=token + "fakedecoded",
-        email="john@example.com",
-        full_name="John Doe",
-    )
-
-
 def delete_token(
     session: Session,
     token: Annotated[str, Depends(oauth2_scheme)],

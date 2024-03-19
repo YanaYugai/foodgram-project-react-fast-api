@@ -31,3 +31,8 @@ class UserCreation(UserBase):
 class UserTokenCreation(BaseModel):
     email: EmailStr
     password: str
+
+
+class UserPasswordReset(BaseModel):
+    new_password: str
+    current_password: str
