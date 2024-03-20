@@ -26,11 +26,14 @@ def test_get_profile(
     }
     response = client.post('api/token/login/', data=login_data)
     tokens = response.json()
-    print(tokens)
+    token = tokens["access_token"]
+    headers = {"Authorization": f"Token {token}"}
+    response = client.get('/api/users/me/', headers=headers)
     user = get_current_user(
         session=clear_tables,  # type: ignore
         token=tokens["access_token"],
     )
+    assert response.status_code == 200
     assert user.email == user_data.email
     assert user.username == user_data.username
     assert user.first_name == user_data.first_name
@@ -78,16 +81,39 @@ def test_get_access_token_incorrect_password(
         "username": user.email,
         "password": "invalid_password",
     }
-    r = client.post('api/token/login/', data=login_data)
-    assert r.status_code == 401
+    response = client.post('api/token/login/', data=login_data)
+    assert response.status_code == 401
 
 
 def test_delete_token(client):
     raise NotImplementedError
 
 
-def test_change_password(client):
-    raise NotImplementedError
+def test_change_password(
+    client,
+    clear_tables: Session,
+    user_data: UserCreation,
+) -> None:
+    user = create_user(session=clear_tables, data=user_data)
+    login_data = {
+        "username": user.email,
+        "password": user_data.password,
+    }
+    response = client.post('api/token/login/', data=login_data)
+    tokens = response.json()
+    token = tokens["access_token"]
+    data = {
+        "new_password": "asfakfas",
+        "current_password": user_data.password,
+    }
+    headers = {"Authorization": f"Token {token}"}
+    response = client.post(
+        '/api/users/set_password/',
+        headers=headers,
+        json=data,
+    )
+    user = get_current_user(session=clear_tables, token=token)
+    assert response.status_code == 204
 
 
 def test_create_user(
