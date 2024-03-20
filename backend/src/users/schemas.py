@@ -36,3 +36,5 @@ class UserTokenCreation(BaseModel):
 class UserPasswordReset(BaseModel):
     new_password: str
     current_password: str
+
+    model_config = ConfigDict(from_attributes=True)
