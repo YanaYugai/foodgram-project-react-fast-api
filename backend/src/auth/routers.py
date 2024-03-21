@@ -53,6 +53,8 @@ def login(
             expires_delta=expire,
         ),
     )
+    session.add(token)
+    session.commit()
     return {
         'access_token': token.access_token,
         'token_type': token.token_type,
