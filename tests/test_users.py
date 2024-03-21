@@ -3,6 +3,7 @@ import http
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from backend.src.auth.utils import verify_password
 from backend.src.crud.services import (
     authenticate_user,
     create_user,
@@ -94,17 +95,25 @@ def test_change_password(
     clear_tables: Session,
     user_data: UserCreation,
 ) -> None:
-    user = create_user(session=clear_tables, data=user_data)
-    login_data = {
-        "username": user.email,
+    user_in = {
+        "email": user_data.email,
         "password": user_data.password,
+        "username": user_data.username,
+        "first_name": user_data.first_name,
+        "last_name": user_data.last_name,
+    }
+    response = client.post('api/users/', json=user_in)
+    user = response.json()
+    login_data = {
+        "username": user['email'],
+        "password": user_in["password"],
     }
     response = client.post('api/token/login/', data=login_data)
     tokens = response.json()
     token = tokens["access_token"]
     data = {
         "new_password": "asfakfas",
-        "current_password": user_data.password,
+        "current_password": user_in["password"],
     }
     headers = {"Authorization": f"Token {token}"}
     response = client.post(
@@ -112,8 +121,12 @@ def test_change_password(
         headers=headers,
         json=data,
     )
-    user = get_current_user(session=clear_tables, token=token)
+    user = get_current_user(
+        session=clear_tables,  # type: ignore
+        token=tokens["access_token"],
+    )
     assert response.status_code == 204
+    assert verify_password("asfakfas", user.password)
 
 
 def test_create_user(
