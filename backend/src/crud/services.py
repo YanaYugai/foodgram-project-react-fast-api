@@ -1,7 +1,7 @@
 from http import HTTPStatus
-from typing import Annotated, Any
+from typing import Any
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -10,10 +10,9 @@ from backend.src.auth.utils import (
     ALGORITHM,
     SECRET_KEY,
     get_password_hash,
-    oauth2_scheme,
     verify_password,
 )
-from backend.src.models import Token, User  # type: ignore
+from backend.src.models import User  # type: ignore
 from backend.src.users.schemas import UserCreation
 from database import Base
 
@@ -53,17 +52,6 @@ def delete_object_by_id(
 ) -> Any:
     obj = get_object_by_id_or_error(id, session, model)
     session.delete(obj)
-    session.commit()
-    return HTTPStatus.NO_CONTENT
-
-
-def delete_token(
-    session: Session,
-    token: Annotated[str, Depends(oauth2_scheme)],
-):
-    statement = select(Token).where(Token.access_token == token)
-    token = session.scalar(statement)
-    session.delete(token)
     session.commit()
     return HTTPStatus.NO_CONTENT
 

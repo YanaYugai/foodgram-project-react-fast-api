@@ -6,11 +6,12 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import select
 
 from backend.database import SessionApi
 from backend.src.auth.schemas import TokenCreation
 from backend.src.auth.utils import create_access_token, oauth2_scheme
-from backend.src.crud.services import authenticate_user, delete_token
+from backend.src.crud.services import authenticate_user
 from backend.src.models import Token
 
 load_dotenv()
@@ -67,4 +68,7 @@ def logout(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
-    delete_token(session=session, token=token)
+    statement = select(Token).where(Token.access_token == token)
+    token = session.scalar(statement)
+    session.delete(token)
+    session.commit()
