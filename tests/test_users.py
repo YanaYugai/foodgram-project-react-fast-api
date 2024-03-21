@@ -17,28 +17,27 @@ from backend.src.users.schemas import UserCreation
 
 def test_get_profile(
     client,
+    token: str,
     clear_tables: Session,
-    user_data: UserCreation,
 ) -> None:
-    user = create_user(session=clear_tables, data=user_data)
-    login_data = {
-        "username": user.email,
-        "password": user_data.password,
-    }
-    response = client.post('api/token/login/', data=login_data)
-    tokens = response.json()
-    token = tokens["access_token"]
     headers = {"Authorization": f"Token {token}"}
     response = client.get('/api/users/me/', headers=headers)
-    user = get_current_user(
-        session=clear_tables,  # type: ignore
-        token=tokens["access_token"],
-    )
+    response_user = response.json()
+    user = get_current_user(session=clear_tables, token=token)
     assert response.status_code == 200
-    assert user.email == user_data.email
-    assert user.username == user_data.username
-    assert user.first_name == user_data.first_name
-    assert user.last_name == user_data.last_name
+    assert user.email == response_user["email"]
+    assert user.username == response_user["username"]
+    assert user.first_name == response_user["first_name"]
+    assert user.last_name == response_user["last_name"]
+
+
+def test_get_profile_incorrect_token(
+    client,
+) -> None:
+    token = 'Invalid_token'
+    headers = {"Authorization": f"Token {token}"}
+    response = client.get('/api/users/me/', headers=headers)
+    assert response.status_code == 401
 
 
 def test_authenticate_user(
@@ -52,6 +51,32 @@ def test_authenticate_user(
         password=user_data.password,
     )
     assert authenticated_user
+
+
+def test_authenticate_user_invalid_password(
+    clear_tables: Session,
+    user_data: UserCreation,
+) -> None:
+    user = create_user(session=clear_tables, data=user_data)
+    authenticated_user = authenticate_user(
+        session=clear_tables,
+        email=user.email,
+        password='invalid_password',
+    )
+    assert not authenticated_user
+
+
+def test_authenticate_user_invalid_email(
+    clear_tables: Session,
+    user_data: UserCreation,
+) -> None:
+    create_user(session=clear_tables, data=user_data)
+    authenticated_user = authenticate_user(
+        session=clear_tables,
+        email='invalid_email',
+        password=user_data.password,
+    )
+    assert not authenticated_user
 
 
 def test_get_access_token(
@@ -90,6 +115,13 @@ def test_delete_token(client, token: str):
     headers = {"Authorization": f"Token {token}"}
     response = client.delete('api/token/logout/', headers=headers)
     assert response.status_code == 204
+
+
+def test_delete_invalid_token(client):
+    token = 'invalid_token'
+    headers = {"Authorization": f"Token {token}"}
+    response = client.delete('api/token/logout/', headers=headers)
+    assert response.status_code == 401
 
 
 def test_change_password(
@@ -141,6 +173,26 @@ def test_create_user(
     assert user.first_name == user_data.first_name
     assert user.last_name == user_data.last_name
     assert hasattr(user, "password")
+
+
+def test_post_user_router(
+    client,
+    user_data: UserCreation,
+) -> None:
+    user_in = {
+        "email": user_data.email,
+        "password": user_data.password,
+        "username": user_data.username,
+        "first_name": user_data.first_name,
+        "last_name": user_data.last_name,
+    }
+    response = client.post('api/users/', json=user_in)
+    user = response.json()
+    assert response.status_code == 201
+    assert user["email"] == user_data.email
+    assert user["username"] == user_data.username
+    assert user["first_name"] == user_data.first_name
+    assert user["last_name"] == user_data.last_name
 
 
 def test_get_user(
