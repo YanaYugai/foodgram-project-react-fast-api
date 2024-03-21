@@ -59,3 +59,27 @@ def user_data() -> UserCreation:
         last_name=last_name,
     )
     return user_in
+
+
+@fixture(scope="function")
+def token(
+    client,
+    user_data: UserCreation,
+) -> str:
+    user_in = {
+        "email": user_data.email,
+        "password": user_data.password,
+        "username": user_data.username,
+        "first_name": user_data.first_name,
+        "last_name": user_data.last_name,
+    }
+    response = client.post('api/users/', json=user_in)
+    user = response.json()
+    login_data = {
+        "username": user['email'],
+        "password": user_in["password"],
+    }
+    response = client.post('api/token/login/', data=login_data)
+    tokens = response.json()
+    token = tokens["access_token"]
+    return token

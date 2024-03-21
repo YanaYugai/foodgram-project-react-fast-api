@@ -86,8 +86,10 @@ def test_get_access_token_incorrect_password(
     assert response.status_code == 401
 
 
-def test_delete_token(client):
-    raise NotImplementedError
+def test_delete_token(client, token: str):
+    headers = {"Authorization": f"Token {token}"}
+    response = client.delete('api/token/logout/', headers=headers)
+    assert response.status_code == 204
 
 
 def test_change_password(
