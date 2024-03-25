@@ -70,5 +70,11 @@ def logout(
 ):
     statement = select(Token).where(Token.access_token == token)
     token = session.scalar(statement)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     session.delete(token)
     session.commit()
