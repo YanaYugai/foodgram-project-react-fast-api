@@ -83,3 +83,11 @@ def token(
     tokens = response.json()
     token = tokens["access_token"]
     return token
+
+
+@fixture(scope="function")
+def headers(
+    token: str,
+) -> dict[str, str]:
+    headers = {"Authorization": f"Token {token}"}
+    return headers
