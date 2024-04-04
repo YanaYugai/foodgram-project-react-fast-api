@@ -47,11 +47,11 @@ def login(
             minutes=int(MINUTES),
         )
     ).timestamp()
-    expire = timedelta(seconds=expire)
+    expires_delta = timedelta(seconds=expire)
     token = Token(
         access_token=create_access_token(
             subject=user.id,
-            expires_delta=expire,
+            expires_delta=expires_delta,
         ),
     )
     session.add(token)

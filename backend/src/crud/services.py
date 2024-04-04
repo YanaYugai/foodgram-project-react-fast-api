@@ -1,11 +1,12 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.database import Base
 from backend.src.auth.utils import (
     ALGORITHM,
     SECRET_KEY,
@@ -14,17 +15,16 @@ from backend.src.auth.utils import (
 )
 from backend.src.models import User  # type: ignore
 from backend.src.users.schemas import UserCreation
-from database import Base
 
 
-def get_object_by_id_or_error(id: int, session: Session, model: Base):
+def get_object_by_id_or_error(id: int, session: Session, model: Any):
     obj = session.get(model, id)
     if obj is None:
         raise HTTPException(status_code=404, detail='Страница не найдена.')
     return obj
 
 
-def get_objects(session: Session, model: Base):
+def get_objects(session: Session, model: Any):
     statement = select(model)
     objects = session.scalars(statement).all()
     return objects
@@ -74,12 +74,12 @@ def get_current_user(
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="Учетные данные не были предоставлены.",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
+        user_id: Optional[str] = payload.get("sub")
         if user_id is None:
             raise credentials_exception
     except JWTError:

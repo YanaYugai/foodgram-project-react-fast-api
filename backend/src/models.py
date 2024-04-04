@@ -137,7 +137,7 @@ class Token(Base):
 
     id: Mapped[intpk] = mapped_column(init=False)
     access_token: Mapped[str]
-    token_type: Mapped[str] = "bearer"
+    token_type: Mapped[str] = mapped_column(default="bearer")
 
 
 """

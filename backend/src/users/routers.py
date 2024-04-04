@@ -2,6 +2,7 @@ from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from backend.database import SessionApi
 from backend.src.auth.utils import get_password_hash, oauth2_scheme
 from backend.src.crud import services
 from backend.src.models import User
@@ -10,7 +11,6 @@ from backend.src.users.schemas import (
     UserPasswordReset,
     UserResponseCreation,
 )
-from database import SessionApi
 
 router = APIRouter(prefix='/api/users', tags=['users'])
 

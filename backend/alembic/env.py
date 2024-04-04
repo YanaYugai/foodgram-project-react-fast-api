@@ -3,13 +3,14 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
+from backend.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 from backend.src.models import Base
-from config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 section = config.config_ini_section
+
 config.set_section_option(section, 'DB_HOST', DB_HOST)
 config.set_section_option(section, 'DB_USER', DB_USER)
 config.set_section_option(section, 'DB_PASS', DB_PASS)

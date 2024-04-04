@@ -29,3 +29,5 @@ repos:
     hooks:
       - id: mypy
         args: [--ignore-missing-imports, --allow-redefinition]
+        additional_dependencies:
+        - "sqlalchemy[mypy]==2.0.23"

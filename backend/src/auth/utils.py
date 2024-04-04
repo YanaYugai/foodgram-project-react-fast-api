@@ -1,8 +1,6 @@
-import os
 from datetime import datetime, timedelta
 from typing import Any, Optional, Union
 
-from dotenv import load_dotenv
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security.utils import get_authorization_scheme_param
@@ -11,11 +9,9 @@ from passlib.context import CryptContext
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 
-load_dotenv()
+from backend.config import SECRET_KEY
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = "HS256"
 
 
