@@ -3,7 +3,7 @@ from typing import Annotated, List
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.database import Base
+from database import Base
 
 str150_unique = Annotated[str, mapped_column(String(150), unique=True)]
 str150 = Annotated[str, mapped_column(String(150))]
