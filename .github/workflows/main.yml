@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - githubworkflows
 jobs:
   linters:
     runs-on: ubuntu-latest
