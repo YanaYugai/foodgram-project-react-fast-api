@@ -60,5 +60,8 @@ jobs:
         echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
         echo MINUTES=${{ secrets.MINUTES }} >> .env
         cat .env
+        cd backend/
+        python -m alembic upgrade head
+        cd ..
         cd tests/
         python -m pytest test_users.py
