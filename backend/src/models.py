@@ -3,7 +3,7 @@ from typing import Annotated, List
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.database import Base
+from database import Base
 
 str150_unique = Annotated[str, mapped_column(String(150), unique=True)]
 str150 = Annotated[str, mapped_column(String(150))]
@@ -112,13 +112,13 @@ class Ingredient(Base):
     )
 
 
-# class Follow(Base):
-#    __tablename__ = 'follow'
-#    __table_args__ = (UniqueConstraint('user_id', 'following_id'))
+class Follow(Base):
+    __tablename__ = 'follow'
+    __table_args__ = (UniqueConstraint('user_id', 'following_id'),)
 
-#    id: Mapped[intpk] = mapped_column(init=False)
-#    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
-#    following_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    id: Mapped[intpk] = mapped_column(init=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    following_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 
 
 class User(Base):
@@ -130,6 +130,13 @@ class User(Base):
     first_name: Mapped[str150]
     last_name: Mapped[str150]
     password: Mapped[str150]
+    followers: Mapped[List['User']] = relationship(
+        "User",
+        secondary="follow",
+        primaryjoin=Follow.following_id == id,
+        secondaryjoin=Follow.user_id == id,
+        backref="following",
+    )
 
 
 class Token(Base):
@@ -149,8 +156,5 @@ class Token(Base):
     )
     recipes_in_cart: Mapped[List['Recipe']] = relationship(
         'Recipe', secondary=lambda: Cart, back_populates='in_cart',
-    )
-    # followers: Mapped[List['User']] = relationship(
-        secondary=lambda: Follow, back_populates='',
     )
 """
