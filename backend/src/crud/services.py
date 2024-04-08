@@ -13,7 +13,7 @@ from backend.src.auth.utils import (
     get_password_hash,
     verify_password,
 )
-from backend.src.models import User  # type: ignore
+from backend.src.models import Follow, User  # type: ignore
 from backend.src.users.schemas import UserCreation
 
 
@@ -43,6 +43,22 @@ def create_user(session: Session, data: UserCreation):
     session.add(user)
     session.commit()
     return user
+
+
+def create_subscribtion(session: Session, id: int, current_user: User):
+    if current_user.id == id:
+        raise HTTPException(status_code=400, detail='Некорректные данные.')
+    statement = select(Follow).where(
+        Follow.id == current_user.id,
+        Follow.following_id == id,
+    )
+    subscribtion = session.scalar(statement)
+    if subscribtion is not None:
+        raise HTTPException(status_code=400, detail='Некорректные данные.')
+    subscribtion = Follow(user_id=current_user.id, following_id=id)
+    session.add(subscribtion)
+    session.commit()
+    return subscribtion
 
 
 def delete_object_by_id(

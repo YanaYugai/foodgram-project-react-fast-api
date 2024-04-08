@@ -1,3 +1,4 @@
+import dataclasses
 from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -7,6 +8,7 @@ from backend.src.auth.utils import get_password_hash, oauth2_scheme
 from backend.src.crud import services
 from backend.src.models import User
 from backend.src.users.schemas import (
+    AuthorRead,
     UserCreation,
     UserPasswordReset,
     UserResponseCreation,
@@ -48,6 +50,31 @@ def get_me(
 ):
     user = services.get_current_user(session=session, token=token)
     return user
+
+
+@router.post('/{user_id}/subscribe/', response_model=AuthorRead)
+def followed_user(
+    user_id: int,
+    session: SessionApi,
+    token: Annotated[str, Depends(oauth2_scheme)],
+):
+    user = services.get_object_by_id_or_error(
+        id=user_id,
+        session=session,
+        model=User,
+    )
+    current_user = services.get_current_user(session=session, token=token)
+    subscribtion = services.create_subscribtion(
+        session=session,
+        id=user.id,
+        current_user=current_user,
+    )
+    following = services.get_object_by_id_or_error(
+        id=subscribtion.following_id,
+        session=session,
+        model=User,
+    )
+    return {**dataclasses.asdict(following), 'is_subscribtion': True}
 
 
 @router.get('/{user_id}/', response_model=UserResponseCreation)

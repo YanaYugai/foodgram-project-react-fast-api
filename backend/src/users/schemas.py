@@ -15,6 +15,8 @@ class UserResponseCreation(UserBase):
 class AuthorRead(UserResponseCreation):
     is_subscribed: bool
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class UserCreation(UserBase):
     password: str
