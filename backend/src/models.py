@@ -136,6 +136,7 @@ class User(Base):
         primaryjoin=Follow.following_id == id,
         secondaryjoin=Follow.user_id == id,
         backref="following",
+        init=False,
     )
 
 

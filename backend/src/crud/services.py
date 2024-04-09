@@ -3,7 +3,9 @@ from typing import Any, Optional
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
+from psycopg2.errors import UniqueViolation
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.database import Base
@@ -57,7 +59,11 @@ def create_subscribtion(session: Session, id: int, current_user: User):
         raise HTTPException(status_code=400, detail='Некорректные данные.')
     subscribtion = Follow(user_id=current_user.id, following_id=id)
     session.add(subscribtion)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError as e:
+        assert isinstance(e.orig, UniqueViolation)
+        raise HTTPException(status_code=400, detail="Некорректные данные.")
     return subscribtion
 
 

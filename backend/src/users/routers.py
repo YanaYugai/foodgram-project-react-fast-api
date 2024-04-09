@@ -52,7 +52,11 @@ def get_me(
     return user
 
 
-@router.post('/{user_id}/subscribe/', response_model=AuthorRead)
+@router.post(
+    '/{user_id}/subscribe/',
+    response_model=AuthorRead,
+    status_code=201,
+)
 def followed_user(
     user_id: int,
     session: SessionApi,
@@ -74,13 +78,6 @@ def followed_user(
         session=session,
         model=User,
     )
-    """
-    TODO: try experiment
-    return AuthorRead.model_validate(
-        obj=following,
-        context={"is_subscribed": True},
-    )
-    """
     return {**dataclasses.asdict(following), 'is_subscribed': True}
 
 
