@@ -74,7 +74,14 @@ def followed_user(
         session=session,
         model=User,
     )
-    return {**dataclasses.asdict(following), 'is_subscribtion': True}
+    """
+    TODO: try experiment
+    return AuthorRead.model_validate(
+        obj=following,
+        context={"is_subscribed": True},
+    )
+    """
+    return {**dataclasses.asdict(following), 'is_subscribed': True}
 
 
 @router.get('/{user_id}/', response_model=UserResponseCreation)
@@ -88,8 +95,8 @@ def get_user(user_id: int, session: SessionApi):
 
 
 @router.post('/', response_model=UserResponseCreation, status_code=201)
-def post_user(user: UserCreation, session: SessionApi):
-    user = services.create_user(session, user)
+def post_user(user_data: UserCreation, session: SessionApi):
+    user = services.create_user(session, user_data)
     return user
 
 
