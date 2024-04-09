@@ -4,11 +4,13 @@ from typing import Generator
 
 from fastapi.testclient import TestClient
 from pytest import fixture
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.sql import text
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.sql import select, text
 
-from backend.database import Base, engine
+from backend.database import engine
 from backend.main import app
+from backend.src.crud import services
+from backend.src.models import Base, Follow
 from backend.src.users.schemas import UserCreation
 
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -64,8 +66,19 @@ def user_data() -> UserCreation:
 @fixture(scope="function")
 def token(
     client,
-    user_data: UserCreation,
 ) -> str:
+    email = random_email()
+    password = random_lower_string()
+    username = random_lower_string()
+    first_name = random_lower_string()
+    last_name = random_lower_string()
+    user_data = UserCreation(
+        email=email,
+        password=password,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+    )
     user_in = {
         "email": user_data.email,
         "password": user_data.password,
@@ -91,3 +104,25 @@ def headers(
 ) -> dict[str, str]:
     headers = {"Authorization": f"Token {token}"}
     return headers
+
+
+@fixture(scope="function")
+def following(
+    client,
+    token,
+    clear_tables: Session,
+    user_data: UserCreation,
+):
+    user = services.create_user(session=clear_tables, data=user_data)
+    current_user = services.get_current_user(session=clear_tables, token=token)
+    response = client.post(
+        f'/api/users/{user.id}/subscribe/',
+        headers={"Authorization": f"Token {token}"},
+    )
+    response_following = response.json()
+    statement = select(Follow).where(
+        Follow.id == current_user.id,
+        Follow.following_id == response_following['id'],
+    )
+    subscribtion = session.scalar(statement)
+    return subscribtion
