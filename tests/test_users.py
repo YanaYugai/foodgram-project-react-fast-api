@@ -204,15 +204,21 @@ def test_get_user(
     assert user.email == user_check.email
     assert user.username == user_check.username
     response = client.get(f'/api/users/{user.id}/')
+    user_response = response.json()
     assert response.status_code == http.HTTPStatus.OK
+    assert user_response['is_subscribed'] is False
 
 
 def test_get_users(
     client,
     clear_tables: Session,
+    user_data: UserCreation,
 ) -> None:
+    user = create_user(session=clear_tables, data=user_data)
     users = get_objects(clear_tables, User)
     count_users = clear_tables.scalar(select(func.count(User.id)))
     assert len(users) == count_users
     response = client.get('/api/users/')
     assert response.status_code == http.HTTPStatus.OK
+    user_response = response.json()
+    assert user_response[0].get('id') == user.id
