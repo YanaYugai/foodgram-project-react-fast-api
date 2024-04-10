@@ -67,6 +67,34 @@ def create_subscribtion(session: Session, id: int, current_user: User):
     return subscribtion
 
 
+def get_subscribtion_or_error(session: Session, id: int, current_user_id: int):
+    statement = select(Follow).where(
+        Follow.id == current_user_id,
+        Follow.following_id == id,
+    )
+    subscribtion = session.scalar(statement)
+    if subscribtion is None:
+        raise HTTPException(
+            status_code=400,
+            detail='Пользователь не подписан.',
+        )
+    return subscribtion
+
+
+def check_is_subscribed(
+    session: Session, id: int, current_user_id: int
+) -> bool:
+    is_subscribed = False
+    statement = select(Follow).where(
+        Follow.id == current_user_id,
+        Follow.following_id == id,
+    )
+    subscribtion = session.scalar(statement)
+    if subscribtion is not None:
+        is_subscribed = True
+    return is_subscribed
+
+
 def delete_object_by_id(
     session: Session,
     id: int,
@@ -112,3 +140,14 @@ def get_current_user(
         model=User,
     )
     return user
+
+
+def get_current_user_without_error(
+    session: Session,
+    token: str,
+):
+    try:
+        current_user = get_current_user(session=session, token=token)
+    except AttributeError:
+        current_user = None
+    return current_user

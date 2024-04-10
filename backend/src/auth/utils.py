@@ -31,7 +31,28 @@ class OAuth2PasswordToken(OAuth2PasswordBearer):
         return param
 
 
+class OAuth2PasswordToken_not_necessary(OAuth2PasswordBearer):
+    async def __call__(self, request: Request) -> Optional[str]:
+        authorization = request.headers.get("Authorization")
+        scheme, param = get_authorization_scheme_param(authorization)
+        if not authorization:
+            return None
+        if scheme.lower() != "token":
+            if self.auto_error:
+                raise HTTPException(
+                    status_code=HTTP_401_UNAUTHORIZED,
+                    detail="Not authenticated",
+                    headers={"Authorization": "Token"},
+                )
+            else:
+                return None
+        return param
+
+
 oauth2_scheme = OAuth2PasswordToken(tokenUrl="api/token/login/")
+oauth2_scheme_token_not_necessary = OAuth2PasswordToken_not_necessary(
+    tokenUrl="api/token/login/"
+)
 
 
 def create_access_token(
