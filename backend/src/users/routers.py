@@ -120,18 +120,24 @@ def unfollowed_user(
     session.commit()
 
 
-"""
-@router.get('/subscriptions/', response_model=List[AuthorRead])
+@router.get('/subscriptions/', response_model=list[AuthorRead])
 def get_subscription(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
     current_user = services.get_current_user(session=session, token=token)
-    statement = select(Follow).filter(
-        Follow.id == current_user.id,
-        Follow.following_id == id,
-    )
-"""
+    users_is_subscribed = []
+    following = current_user.following
+    for user in following:
+        is_subscribed = services.check_is_subscribed(
+            session=session,
+            id=user.id,
+            current_user_id=current_user.id,
+        )
+        users_is_subscribed.append(
+            {**dataclasses.asdict(user), 'is_subscribed': is_subscribed},
+        )
+    return users_is_subscribed
 
 
 @router.get('/{user_id}/', response_model=AuthorRead)
@@ -180,7 +186,7 @@ def get_users(
     if current_user is None:
         for user in users:
             users_is_subscribed.append(
-                {**dataclasses.asdict(user), 'is_subscribed': False}
+                {**dataclasses.asdict(user), 'is_subscribed': False},
             )
     else:
         for user in users:
@@ -190,6 +196,6 @@ def get_users(
                 current_user_id=current_user.id,
             )
             users_is_subscribed.append(
-                {**dataclasses.asdict(user), 'is_subscribed': is_subscribed}
+                {**dataclasses.asdict(user), 'is_subscribed': is_subscribed},
             )
     return users_is_subscribed

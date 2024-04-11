@@ -51,7 +51,7 @@ class OAuth2PasswordToken_not_necessary(OAuth2PasswordBearer):
 
 oauth2_scheme = OAuth2PasswordToken(tokenUrl="api/token/login/")
 oauth2_scheme_token_not_necessary = OAuth2PasswordToken_not_necessary(
-    tokenUrl="api/token/login/"
+    tokenUrl="api/token/login/",
 )
 
 
