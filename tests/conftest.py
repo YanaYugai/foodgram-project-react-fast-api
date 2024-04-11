@@ -5,12 +5,12 @@ from typing import Generator
 from fastapi.testclient import TestClient
 from pytest import fixture
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.sql import select, text
+from sqlalchemy.sql import text
 
 from backend.database import engine
 from backend.main import app
 from backend.src.crud import services
-from backend.src.models import Base, Follow
+from backend.src.models import Base
 from backend.src.users.schemas import UserCreation
 
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -109,20 +109,13 @@ def headers(
 @fixture(scope="function")
 def following(
     client,
-    token,
+    headers: dict[str, str],
     clear_tables: Session,
     user_data: UserCreation,
 ):
     user = services.create_user(session=clear_tables, data=user_data)
-    current_user = services.get_current_user(session=clear_tables, token=token)
-    response = client.post(
+    client.post(
         f'/api/users/{user.id}/subscribe/',
-        headers={"Authorization": f"Token {token}"},
+        headers=headers,
     )
-    response_following = response.json()
-    statement = select(Follow).where(
-        Follow.id == current_user.id,
-        Follow.following_id == response_following['id'],
-    )
-    subscribtion = session.scalar(statement)
-    return subscribtion
+    return user.id, headers

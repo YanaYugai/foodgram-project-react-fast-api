@@ -158,7 +158,7 @@ def test_change_password(
         session=clear_tables,  # type: ignore
         token=tokens["access_token"],
     )
-    assert response.status_code == 204
+    assert response.status_code == http.HTTPStatus.NO_CONTENT
     assert verify_password("asfakfas", user.password)
 
 
