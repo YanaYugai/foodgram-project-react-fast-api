@@ -44,7 +44,6 @@ def set_password(
         )
     hashed_password = get_password_hash(data.new_password)
     user.password = hashed_password
-    session.add(user)
     session.commit()
 
 

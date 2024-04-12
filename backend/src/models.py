@@ -60,10 +60,10 @@ class Recipe(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(255))
     text: Mapped[str]
-    # author_id: Mapped[user_fk]
+    author_id: Mapped[user_fk]
     image: Mapped[str]
     cooking_time: Mapped[int]
-    # author: Mapped["User"] = relationship('User', back_populates="recipes")
+    author: Mapped["User"] = relationship('User', back_populates="recipes")
     tags: Mapped[List["Tag"]] = relationship(
         "Tag",
         secondary="tagsinrecipe",
@@ -138,6 +138,12 @@ class User(Base):
         backref="following",
         init=False,
     )
+    recipes: Mapped[List["Recipe"]] = relationship(
+        'Recipe',
+        back_populates='author',
+        cascade="all, delete-orphan",
+        init=False,
+    )
 
 
 class Token(Base):
@@ -149,9 +155,6 @@ class Token(Base):
 
 
 """
-    recipes: Mapped[List["Recipe"]] = relationship(
-        'Recipe', back_populates='author', cascade="all, delete-orphan",
-    )
     recipes_in_favorite: Mapped[List['Recipe']] = relationship(
         'Recipe', secondary=lambda: Favorite, back_populates='in_favorite',
     )
