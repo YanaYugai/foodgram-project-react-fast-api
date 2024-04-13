@@ -37,6 +37,8 @@ class IngredientsInRecipe(Base):
 
 
 """
+
+
 class RecipeUserMixin:
     __table_args__ = (UniqueConstraint("recipe_id", "user_id"),)
 
@@ -51,6 +53,7 @@ class Cart(RecipeUserMixin, Base):
 
 class Favorite(RecipeUserMixin, Base):
     __tablename__ = "favorite"
+
 """
 
 
@@ -60,10 +63,12 @@ class Recipe(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(255))
     text: Mapped[str]
-    author_id: Mapped[user_fk]
+    author_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
     image: Mapped[str]
     cooking_time: Mapped[int]
-    author: Mapped["User"] = relationship('User', back_populates="recipes")
+    author: Mapped["User"] = relationship(
+        'User', back_populates="recipes", init=False
+    )
     tags: Mapped[List["Tag"]] = relationship(
         "Tag",
         secondary="tagsinrecipe",
@@ -72,6 +77,7 @@ class Recipe(Base):
     ingredients_in_recipe: Mapped[List["IngredientsInRecipe"]] = relationship(
         "IngredientsInRecipe",
         back_populates="recipe",
+        init=False,
     )
     ingredients: Mapped[List["Ingredient"]] = relationship(
         secondary="ingredientsinrecipe",
@@ -96,6 +102,7 @@ class Tag(Base):
         "Recipe",
         secondary="tagsinrecipe",
         back_populates="tags",
+        init=False,
     )
 
 
@@ -105,10 +112,12 @@ class Ingredient(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str200]
     measurement_unit: Mapped[str200]
+
     recipes: Mapped[List["Recipe"]] = relationship(
         "Recipe",
         secondary="ingredientsinrecipe",
         back_populates="ingredients",
+        init=False,
     )
 
 
@@ -160,5 +169,6 @@ class Token(Base):
     )
     recipes_in_cart: Mapped[List['Recipe']] = relationship(
         'Recipe', secondary=lambda: Cart, back_populates='in_cart',
+    )
     )
 """
