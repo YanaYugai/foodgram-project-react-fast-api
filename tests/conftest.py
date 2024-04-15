@@ -11,6 +11,7 @@ from backend.database import engine
 from backend.main import app
 from backend.src.crud import services
 from backend.src.models import Base
+from backend.src.recipes.schemas import RecipeCreate
 from backend.src.users.schemas import UserCreation
 
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -34,9 +35,10 @@ def session() -> Generator:
 def clear_tables(session) -> Generator:
     yield session
     for table in Base.metadata.sorted_tables:
-        session.execute(
-            text(f'TRUNCATE "{table.name}" RESTART IDENTITY CASCADE;'),
-        )
+        if table.name not in ('ingredient', 'tag'):
+            session.execute(
+                text(f'TRUNCATE "{table.name}" RESTART IDENTITY CASCADE;'),
+            )
     session.commit()
 
 
@@ -61,6 +63,25 @@ def user_data() -> UserCreation:
         last_name=last_name,
     )
     return user_in
+
+
+@fixture(scope="function")
+def recipe_data() -> RecipeCreate:
+    image = random_lower_string()
+    name = random_lower_string()
+    text = random_lower_string()
+    cooking_time = 100
+    tags = [1]
+    ingredients = [{"id": 1, "amount": 10}]
+    recipe_in = RecipeCreate(
+        image=image,
+        name=name,
+        text=text,
+        cooking_time=cooking_time,
+        tags=tags,
+        ingredients=ingredients,
+    )
+    return recipe_in
 
 
 @fixture(scope="function")
@@ -119,3 +140,18 @@ def following(
         headers=headers,
     )
     return user.id, headers
+
+
+@fixture(scope="function")
+def recipe(
+    client,
+    headers: dict[str, str],
+    recipe_data: RecipeCreate,
+):
+    response = client.post(
+        url="/api/recipes/",
+        headers=headers,
+        json=recipe_data.model_dump(),
+    )
+    recipe = response.json()
+    return recipe, headers
