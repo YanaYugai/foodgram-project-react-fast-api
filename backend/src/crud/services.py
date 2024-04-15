@@ -8,14 +8,13 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from backend.database import Base
 from backend.src.auth.utils import (
     ALGORITHM,
     SECRET_KEY,
     get_password_hash,
     verify_password,
 )
-from backend.src.models import Follow, User  # type: ignore
+from backend.src.models import Follow, Recipe, User  # type: ignore
 from backend.src.users.schemas import UserCreation
 
 
@@ -98,7 +97,7 @@ def check_is_subscribed(
 def delete_object_by_id(
     session: Session,
     id: int,
-    model: Base,
+    model: Any,
 ) -> Any:
     obj = get_object_by_id_or_error(id, session, model)
     session.delete(obj)
@@ -140,6 +139,14 @@ def get_current_user(
         model=User,
     )
     return user
+
+
+def check_user_is_author(user: User, recipe: Recipe):
+    if user.id != recipe.author_id:
+        raise HTTPException(
+            status_code=403,
+            detail="У вас недостаточно прав для выполнения данного действия.",
+        )
 
 
 def get_current_user_without_error(

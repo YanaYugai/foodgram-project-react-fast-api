@@ -1,12 +1,11 @@
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends
 
 from backend.database import SessionApi
 from backend.src.auth.utils import oauth2_scheme
 from backend.src.crud import services
-from backend.src.example_responses import recipes  # noqa: E402
-from backend.src.models import Recipe
+from backend.src.models import IngredientsInRecipe, Recipe, TagsInRecipe
 from backend.src.recipes.schemas import RecipeCreate, RecipeRead
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
@@ -22,9 +21,29 @@ def create_recipe(
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
     current_user = services.get_current_user(session=session, token=token)
-    recipe = Recipe(**recipe_data.model_dump(), author_id=current_user.id)
+    recipe_data = recipe_data.model_dump()
+    ingredients = recipe_data.pop('ingredients')
+    tags = recipe_data.pop('tags')
+    recipe = Recipe(**recipe_data, author_id=current_user.id)
     session.add(recipe)
     session.commit()
+    session.refresh(recipe)
+    for ingredient in ingredients:
+        ingredient_recipe = IngredientsInRecipe(
+            recipe_id=recipe.id,
+            ingredient_id=ingredient['id'],
+            amount=ingredient['amount'],
+        )
+        recipe.ingredients.append(ingredient_recipe)
+    for tag in tags:
+        session.add(
+            TagsInRecipe(
+                recipe_id=recipe.id,
+                tag_id=tag,
+            )
+        )
+    session.commit()
+    session.refresh(recipe)
     return recipe
 
 
@@ -53,25 +72,51 @@ def patch_recipe(
 ):
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
-        id=recipe_id, session=session, model=Recipe
+        id=recipe_id,
+        session=session,
+        model=Recipe,
     )
-    if recipe.author_id != current_user.id:
-        raise HTTPException(
-            status_code=403,
-            detail="У вас недостаточно прав для выполнения данного действия.",
-        )
-    recipe = Recipe(**recipe_data.model_dump(), author_id=current_user.id)
+    recipe_data = recipe_data.model_dump()
+    ingredients = recipe_data.pop('ingredients')
+    tags = recipe_data.pop('tags')
+    services.check_user_is_author(user=current_user, recipe=recipe)
+    recipe = Recipe(**recipe_data, author_id=current_user.id)
     session.add(recipe)
     session.commit()
+    session.refresh(recipe)
+    ingredients_sql = [
+        IngredientsInRecipe(
+            recipe_id=recipe.id,
+            ingredient_id=ingredient['id'],
+            amount=ingredient['amount'],
+        )
+        for ingredient in ingredients
+    ]
+    tags_sql = [
+        TagsInRecipe(
+            recipe_id=recipe.id,
+            tag_id=tag,
+        )
+        for tag in tags
+    ]
+    session.add_all(ingredients_sql)
+    session.add_all(tags_sql)
+    session.commit()
+    session.refresh(recipe)
     return recipe
 
 
 @router.delete('/{recipe_id}/', status_code=204)
-def delete_recipe(recipe_id: int, Authorization: Annotated[str, Header()]):
-    if Authorization != f'Token {tokencorrect}':
-        raise HTTPException(
-            status_code=401,
-            detail="Учетные данные не были предоставлены.",
-        )
-    if recipe_id not in recipes:
-        raise HTTPException(status_code=404, detail="Страница не найдена.")
+def delete_recipe(
+    recipe_id: int,
+    session: SessionApi,
+    token: Annotated[str, Depends(oauth2_scheme)],
+):
+    current_user = services.get_current_user(session=session, token=token)
+    recipe = services.get_object_by_id_or_error(
+        id=recipe_id,
+        session=session,
+        model=Recipe,
+    )
+    services.check_user_is_author(user=current_user, recipe=recipe)
+    services.delete_object_by_id(session=session, id=recipe.id, model=Recipe)
