@@ -91,7 +91,6 @@ def test_update_recipe(client, recipe):
     # assert response.json() == recipes[1]
 
 
-# TODO: refactoring required
 def test_update_recipe_uncorrect_value(client, recipe):
     "Невозможно обновить рецепт с переданными некорректными данными"
     recipe_response, headers = recipe
