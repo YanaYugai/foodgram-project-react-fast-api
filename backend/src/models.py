@@ -16,36 +16,36 @@ recipe_id = Annotated[int, mapped_column(ForeignKey("recipe.id"))]
 
 class TagsInRecipe(Base):
     __tablename__ = "tagsinrecipe"
-    __table_args__ = (UniqueConstraint("recipe_id", "tag_id"),)
 
     recipe_id: Mapped[int] = mapped_column(
         ForeignKey("recipe.id"), primary_key=True
     )
     tag_id: Mapped[int] = mapped_column(ForeignKey("tag.id"), primary_key=True)
-    tag: Mapped['Tag'] = relationship(
-        'Tag', back_populates='taginrecipe', init=False
-    )
+    # tag: Mapped['Tag'] = relationship(
+    #    'Tag', back_populates='taginrecipe', init=False
+    # )
 
 
 class IngredientsInRecipe(Base):
     __tablename__ = "ingredientsinrecipe"
-    __table_args__ = (UniqueConstraint("recipe_id", "ingredient_id"),)
 
     recipe_id: Mapped[int] = mapped_column(
         ForeignKey("recipe.id"), primary_key=True
     )
     ingredient_id: Mapped[int] = mapped_column(
-        ForeignKey("ingredient.id"), primary_key=True
+        ForeignKey("ingredient.id"),
+        primary_key=True,
+        confirm_deleted_rows=False,
     )
     amount: Mapped[int]
-    recipe: Mapped["Recipe"] = relationship(
-        "Recipe",
-        back_populates="ingredients",
-        init=False,
-    )
+    # recipe: Mapped["Recipe"] = relationship(
+    #    "Recipe",
+    #    back_populates="ingredients",
+    #    init=False,
+    # )
     ingredient: Mapped["Ingredient"] = relationship(
         "Ingredient",
-        back_populates="ingredients_in_recipe",
+        # back_populates="ingredients_in_recipe",
         init=False,
     )
     id: AssociationProxy[int] = association_proxy(
@@ -61,13 +61,14 @@ class IngredientsInRecipe(Base):
 
 """
 
-
 class RecipeUserMixin:
-    __table_args__ = (UniqueConstraint("recipe_id", "user_id"),)
 
-    id: Mapped[intpk] = mapped_column(init=False)
-    recipe_id: Mapped[recipe_id]
-    user_id: Mapped[user_fk]
+    recipe_id: Mapped[int] = mapped_column(
+        ForeignKey("recipe.id"), primary_key=True
+    )
+    user_id: Mapped[user_fk] = mapped_column(
+        ForeignKey("int"), primary_key=True
+    )
 
 
 class Cart(RecipeUserMixin, Base):
@@ -76,7 +77,6 @@ class Cart(RecipeUserMixin, Base):
 
 class Favorite(RecipeUserMixin, Base):
     __tablename__ = "favorite"
-
 """
 
 
@@ -86,6 +86,7 @@ class Ingredient(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str200]
     measurement_unit: Mapped[str200]
+    """
     ingredients_in_recipe: Mapped[List["IngredientsInRecipe"]] = relationship(
         "IngredientsInRecipe",
         back_populates="ingredient",
@@ -97,6 +98,7 @@ class Ingredient(Base):
         back_populates="ingredients_in_recipe",
         init=False,
     )
+    """
 
 
 class Recipe(Base):
@@ -116,19 +118,20 @@ class Recipe(Base):
     tags: Mapped[List["Tag"]] = relationship(
         "Tag",
         secondary="tagsinrecipe",
-        back_populates="recipes",
+        # back_populates="recipes",
         init=False,
     )
     ingredients: Mapped[List["IngredientsInRecipe"]] = relationship(
         "IngredientsInRecipe",
-        back_populates="recipe",
+        # back_populates="recipe",
         init=False,
+        cascade="all, delete",
     )
+    """
     ingredients_in_recipe: Mapped[List["Ingredient"]] = relationship(
         secondary="ingredientsinrecipe",
         back_populates="recipes",
         init=False,
-        cascade="save-update, merge, delete, delete-orphan",
     )
     # in_favorite: Mapped[List['User']] = relationship(
     #    secondary=lambda: Favorite, back_populates='recipes_in_favorite',
@@ -136,6 +139,7 @@ class Recipe(Base):
     # in_cart: Mapped[List['User']] = relationship(
     #    secondary=lambda: Cart, back_populates='recipes_in_cart',
     # )
+"""
 
 
 class Tag(Base):
@@ -145,6 +149,7 @@ class Tag(Base):
     name: Mapped[str200]
     color: Mapped[str] = mapped_column(String(7))
     slug: Mapped[str] = mapped_column(String(200), unique=True)
+    """
     taginrecipe: Mapped[List["TagsInRecipe"]] = relationship(
         'TagsInRecipe', back_populates='tag', init=False
     )
@@ -154,6 +159,7 @@ class Tag(Base):
         back_populates="tags",
         init=False,
     )
+"""
 
 
 class Follow(Base):

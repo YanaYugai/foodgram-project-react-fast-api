@@ -13,7 +13,7 @@ class UserResponseCreation(UserBase):
 
 
 class AuthorRead(UserResponseCreation):
-    is_subscribed: bool
+    is_subscribed: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
