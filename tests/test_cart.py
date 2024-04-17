@@ -1,27 +1,42 @@
 import http
 
 
-# TODO: when db will be ready add assert response.json
-def test_add_recipe(client):
+def test_add_recipe_correct_credentials(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
     response = client.post(
-        '/api/recipes/1/shopping_cart/',
-        headers={"Authorization": "Token TOKENVALUE"},
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
     )
     assert response.status_code == http.HTTPStatus.CREATED
 
 
-def test_add_recipe_twice(client):
+def test_add_recipe_twice(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
     response = client.post(
-        '/api/recipes/1/shopping_cart/',
-        headers={"Authorization": "Token TOKENVALUE"},
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
+    )
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {"errors": "string"}
+    assert response.json() == {'detail': 'Некорректные данные.'}
 
 
-def test_add_recipe_failure_credentials(client):
+def test_add_recipe_failure_credentials(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
     response = client.post(
-        '/api/recipes/2/shopping_cart/',
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
         headers={"Authorization": "Token invalid_token"},
     )
     assert response.status_code == http.HTTPStatus.UNAUTHORIZED
@@ -30,26 +45,54 @@ def test_add_recipe_failure_credentials(client):
     }
 
 
-def test_delete_recipe(client):
+def test_delete_recipe(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
+    )
     response = client.delete(
-        '/api/recipes/1/shopping_cart/',
-        headers={"Authorization": "Token TOKENVALUE"},
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
     )
     assert response.status_code == http.HTTPStatus.NO_CONTENT
 
 
-def test_delete_recipe_twice(client):
+def test_delete_recipe_twice(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
+    )
     response = client.delete(
-        '/api/recipes/1/shopping_cart/',
-        headers={"Authorization": "Token TOKENVALUE"},
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
+    )
+    response = client.delete(
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {"errors": "string"}
+    assert response.json() == {'detail': 'Рецепта нет в корзине.'}
 
 
-def test_delete_recipe_failure_credentials(client):
+def test_delete_recipe_failure_credentials(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
+        headers=headers,
+    )
     response = client.delete(
-        '/api/recipes/2/shopping_cart/',
+        f'/api/recipes/{recipe_response.get("id")}/shopping_cart/',
         headers={"Authorization": "Token invalid_token"},
     )
     assert response.status_code == http.HTTPStatus.UNAUTHORIZED
