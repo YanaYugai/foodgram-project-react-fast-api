@@ -18,7 +18,8 @@ class TagsInRecipe(Base):
     __tablename__ = "tagsinrecipe"
 
     recipe_id: Mapped[int] = mapped_column(
-        ForeignKey("recipe.id"), primary_key=True
+        ForeignKey("recipe.id"),
+        primary_key=True,
     )
     tag_id: Mapped[int] = mapped_column(ForeignKey("tag.id"), primary_key=True)
     # tag: Mapped['Tag'] = relationship(
@@ -30,7 +31,8 @@ class IngredientsInRecipe(Base):
     __tablename__ = "ingredientsinrecipe"
 
     recipe_id: Mapped[int] = mapped_column(
-        ForeignKey("recipe.id"), primary_key=True
+        ForeignKey("recipe.id"),
+        primary_key=True,
     )
     ingredient_id: Mapped[int] = mapped_column(
         ForeignKey("ingredient.id"),
@@ -49,25 +51,29 @@ class IngredientsInRecipe(Base):
         init=False,
     )
     id: AssociationProxy[int] = association_proxy(
-        "ingredient", "id", init=False
+        "ingredient",
+        "id",
+        init=False,
     )
     name: AssociationProxy[str200] = association_proxy(
-        "ingredient", "name", init=False
+        "ingredient",
+        "name",
+        init=False,
     )
     measurement_unit: AssociationProxy[str200] = association_proxy(
-        "ingredient", "measurement_unit", init=False
+        "ingredient",
+        "measurement_unit",
+        init=False,
     )
 
-
-"""
 
 class RecipeUserMixin:
 
     recipe_id: Mapped[int] = mapped_column(
         ForeignKey("recipe.id"), primary_key=True
     )
-    user_id: Mapped[user_fk] = mapped_column(
-        ForeignKey("int"), primary_key=True
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"), primary_key=True
     )
 
 
@@ -77,7 +83,6 @@ class Cart(RecipeUserMixin, Base):
 
 class Favorite(RecipeUserMixin, Base):
     __tablename__ = "favorite"
-"""
 
 
 class Ingredient(Base):
