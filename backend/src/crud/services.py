@@ -3,9 +3,7 @@ from typing import Any, Optional
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
-from psycopg2.errors import UniqueViolation
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.src.auth.utils import (
@@ -58,12 +56,32 @@ def create_subscribtion(session: Session, id: int, current_user: User):
         raise HTTPException(status_code=400, detail='Некорректные данные.')
     subscribtion = Follow(user_id=current_user.id, following_id=id)
     session.add(subscribtion)
+    session.commit()
+    return subscribtion
+    """
     try:
         session.commit()
     except IntegrityError as e:
         assert isinstance(e.orig, UniqueViolation)
         raise HTTPException(status_code=400, detail="Некорректные данные.")
     return subscribtion
+"""
+
+
+def create_favorite_cart(
+    session: Session, id: int, current_user: User, model: Any
+):
+    statement = select(model).where(
+        model.user_id == current_user.id,
+        model.recipe_id == id,
+    )
+    favorite_cart = session.scalar(statement)
+    if favorite_cart is not None:
+        raise HTTPException(status_code=400, detail='Некорректные данные.')
+    favorite_cart = model(user_id=current_user.id, recipe_id=id)
+    session.add(favorite_cart)
+    session.commit()
+    return favorite_cart
 
 
 def get_subscribtion_or_error(session: Session, id: int, current_user_id: int):
@@ -81,7 +99,9 @@ def get_subscribtion_or_error(session: Session, id: int, current_user_id: int):
 
 
 def check_is_subscribed(
-    session: Session, id: int, current_user_id: int
+    session: Session,
+    id: int,
+    current_user_id: int,
 ) -> bool:
     is_subscribed = False
     statement = select(Follow).where(

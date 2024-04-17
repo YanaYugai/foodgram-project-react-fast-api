@@ -45,7 +45,11 @@ def handle(session):
                 for row in reader:
                     name, color, slug = row
                     get_or_create(
-                        session, model, name=name, color=color, slug=slug
+                        session,
+                        model,
+                        name=name,
+                        color=color,
+                        slug=slug,
                     )
             session.commit()
 
