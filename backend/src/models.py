@@ -22,9 +22,6 @@ class TagsInRecipe(Base):
         primary_key=True,
     )
     tag_id: Mapped[int] = mapped_column(ForeignKey("tag.id"), primary_key=True)
-    # tag: Mapped['Tag'] = relationship(
-    #    'Tag', back_populates='taginrecipe', init=False
-    # )
 
 
 class IngredientsInRecipe(Base):
@@ -40,11 +37,6 @@ class IngredientsInRecipe(Base):
         confirm_deleted_rows=False,
     )
     amount: Mapped[int]
-    # recipe: Mapped["Recipe"] = relationship(
-    #    "Recipe",
-    #    back_populates="ingredients",
-    #    init=False,
-    # )
     ingredient: Mapped["Ingredient"] = relationship(
         "Ingredient",
         # back_populates="ingredients_in_recipe",
@@ -91,19 +83,6 @@ class Ingredient(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str200]
     measurement_unit: Mapped[str200]
-    """
-    ingredients_in_recipe: Mapped[List["IngredientsInRecipe"]] = relationship(
-        "IngredientsInRecipe",
-        back_populates="ingredient",
-        init=False,
-    )
-    recipes: Mapped[List["Recipe"]] = relationship(
-        "Recipe",
-        secondary="ingredientsinrecipe",
-        back_populates="ingredients_in_recipe",
-        init=False,
-    )
-    """
 
 
 class Recipe(Base):
@@ -123,28 +102,13 @@ class Recipe(Base):
     tags: Mapped[List["Tag"]] = relationship(
         "Tag",
         secondary="tagsinrecipe",
-        # back_populates="recipes",
         init=False,
     )
     ingredients: Mapped[List["IngredientsInRecipe"]] = relationship(
         "IngredientsInRecipe",
-        # back_populates="recipe",
         init=False,
         cascade="all, delete",
     )
-    """
-    ingredients_in_recipe: Mapped[List["Ingredient"]] = relationship(
-        secondary="ingredientsinrecipe",
-        back_populates="recipes",
-        init=False,
-    )
-    # in_favorite: Mapped[List['User']] = relationship(
-    #    secondary=lambda: Favorite, back_populates='recipes_in_favorite',
-    # )
-    # in_cart: Mapped[List['User']] = relationship(
-    #    secondary=lambda: Cart, back_populates='recipes_in_cart',
-    # )
-"""
 
 
 class Tag(Base):
@@ -154,17 +118,6 @@ class Tag(Base):
     name: Mapped[str200]
     color: Mapped[str] = mapped_column(String(7))
     slug: Mapped[str] = mapped_column(String(200), unique=True)
-    """
-    taginrecipe: Mapped[List["TagsInRecipe"]] = relationship(
-        'TagsInRecipe', back_populates='tag', init=False
-    )
-    recipes: Mapped[List["Recipe"]] = relationship(
-        "Recipe",
-        secondary="tagsinrecipe",
-        back_populates="tags",
-        init=False,
-    )
-"""
 
 
 class Follow(Base):
@@ -207,14 +160,3 @@ class Token(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     access_token: Mapped[str]
     token_type: Mapped[str] = mapped_column(default="bearer")
-
-
-"""
-    recipes_in_favorite: Mapped[List['Recipe']] = relationship(
-        'Recipe', secondary=lambda: Favorite, back_populates='in_favorite',
-    )
-    recipes_in_cart: Mapped[List['Recipe']] = relationship(
-        'Recipe', secondary=lambda: Cart, back_populates='in_cart',
-    )
-    )
-"""

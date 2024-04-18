@@ -4,15 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 
 from backend.database import SessionApi
-from backend.src.auth.utils import oauth2_scheme
-from backend.src.crud import services
-from backend.src.models import (
-    Cart,
-    Favorite,
-    IngredientsInRecipe,
-    Recipe,
-    TagsInRecipe,
+from backend.src.auth.utils import (
+    oauth2_scheme,
+    oauth2_scheme_token_not_necessary,
 )
+from backend.src.crud import services
+from backend.src.models import Cart, Favorite, Recipe
 from backend.src.recipes.schemas import (
     RecipeCreate,
     RecipeRead,
@@ -39,39 +36,55 @@ def create_recipe(
     session.add(recipe)
     session.commit()
     session.refresh(recipe)
-    for ingredient in ingredients:
-        ingredient_recipe = IngredientsInRecipe(
-            recipe_id=recipe.id,
-            ingredient_id=ingredient['id'],
-            amount=ingredient['amount'],
+    recipe_with_ingredients_and_tags = (
+        services.create_ingredients_tags_in_recipe(
+            session, ingredients, tags, recipe
         )
-        recipe.ingredients.append(ingredient_recipe)
-    for tag in tags:
-        session.add(
-            TagsInRecipe(
-                recipe_id=recipe.id,
-                tag_id=tag,
-            ),
-        )
-    session.commit()
-    session.refresh(recipe)
-    return recipe
+    )
+    recipe_correct_response = services.get_is_subs_is_favorited_is_sc(
+        recipe_with_ingredients_and_tags, session, current_user
+    )
+    return recipe_correct_response
 
 
 @router.get('/{recipe_id}/', response_model=RecipeRead)
-def get_recipe(recipe_id: int, session: SessionApi):
+def get_recipe(
+    recipe_id: int,
+    session: SessionApi,
+    token: Annotated[str, Depends(oauth2_scheme_token_not_necessary)],
+):
     recipe = services.get_object_by_id_or_error(
         id=recipe_id,
         session=session,
         model=Recipe,
     )
+    current_user = services.get_current_user_without_error(
+        session=session,
+        token=token,
+    )
+    recipe = services.get_is_subs_is_favorited_is_sc(
+        recipe, session, current_user
+    )
     return recipe
 
 
 @router.get('/', response_model=List[RecipeRead])
-def get_recipes(session: SessionApi):
+def get_recipes(
+    session: SessionApi,
+    token: Annotated[str, Depends(oauth2_scheme_token_not_necessary)],
+):
+    recipes_new = []
+    current_user = services.get_current_user_without_error(
+        session=session,
+        token=token,
+    )
     recipes = services.get_objects(session=session, model=Recipe)
-    return recipes
+    for recipe in recipes:
+        recipe = services.get_is_subs_is_favorited_is_sc(
+            recipe, session, current_user
+        )
+        recipes_new.append(recipe)
+    return recipes_new
 
 
 @router.patch('/{recipe_id}/', response_model=RecipeRead)
@@ -95,26 +108,15 @@ def patch_recipe(
     session.add(recipe)
     session.commit()
     session.refresh(recipe)
-    ingredients_sql = [
-        IngredientsInRecipe(
-            recipe_id=recipe.id,
-            ingredient_id=ingredient['id'],
-            amount=ingredient['amount'],
+    recipe_with_ingredients_and_tags = (
+        services.create_ingredients_tags_in_recipe(
+            session, ingredients, tags, recipe
         )
-        for ingredient in ingredients
-    ]
-    tags_sql = [
-        TagsInRecipe(
-            recipe_id=recipe.id,
-            tag_id=tag,
-        )
-        for tag in tags
-    ]
-    session.add_all(ingredients_sql)
-    session.add_all(tags_sql)
-    session.commit()
-    session.refresh(recipe)
-    return recipe
+    )
+    recipe_correct_response = services.get_is_subs_is_favorited_is_sc(
+        recipe_with_ingredients_and_tags, session, current_user
+    )
+    return recipe_correct_response
 
 
 @router.post(
@@ -170,7 +172,9 @@ def add_recipe_to_cart(
 ):
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
-        id=recipe_id, session=session, model=Recipe
+        id=recipe_id,
+        session=session,
+        model=Recipe,
     )
     services.create_favorite_cart(
         id=recipe.id, session=session, current_user=current_user, model=Cart

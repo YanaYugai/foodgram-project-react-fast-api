@@ -1,4 +1,3 @@
-import dataclasses
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -53,7 +52,7 @@ def get_me(
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
     user = services.get_current_user(session=session, token=token)
-    return {**dataclasses.asdict(user), 'is_subscribed': False}
+    return user
 
 
 @router.post(
@@ -72,22 +71,13 @@ def followed_user(
         model=User,
     )
     current_user = services.get_current_user(session=session, token=token)
-    subscribtion = services.create_subscribtion(
+    services.create_subscribtion(
         session=session,
         id=user.id,
         current_user=current_user,
     )
-    following = services.get_object_by_id_or_error(
-        id=subscribtion.following_id,
-        session=session,
-        model=User,
-    )
-    is_subscribed = services.check_is_subscribed(
-        session=session,
-        id=user.id,
-        current_user_id=current_user.id,
-    )
-    return {**dataclasses.asdict(following), 'is_subscribed': is_subscribed}
+    user = services.get_is_subscribed(session, current_user, user)
+    return user
 
 
 @router.delete(
@@ -128,14 +118,8 @@ def get_subscription(
     users_is_subscribed = []
     following = current_user.following
     for user in following:
-        is_subscribed = services.check_is_subscribed(
-            session=session,
-            id=user.id,
-            current_user_id=current_user.id,
-        )
-        users_is_subscribed.append(
-            {**dataclasses.asdict(user), 'is_subscribed': is_subscribed},
-        )
+        user = services.get_is_subscribed(session, current_user, user)
+        users_is_subscribed.append(user)
     return users_is_subscribed
 
 
@@ -154,15 +138,8 @@ def get_user(
         session=session,
         token=token,
     )
-    if current_user is None:
-        is_subscribed = False
-    else:
-        is_subscribed = services.check_is_subscribed(
-            session=session,
-            id=user.id,
-            current_user_id=current_user.id,
-        )
-    return {**dataclasses.asdict(user), 'is_subscribed': is_subscribed}
+    user = services.get_is_subscribed(session, current_user, user)
+    return user
 
 
 @router.post('/', response_model=UserResponseCreation, status_code=201)
@@ -182,19 +159,7 @@ def get_users(
         session=session,
         token=token,
     )
-    if current_user is None:
-        for user in users:
-            users_is_subscribed.append(
-                {**dataclasses.asdict(user), 'is_subscribed': False},
-            )
-    else:
-        for user in users:
-            is_subscribed = services.check_is_subscribed(
-                session=session,
-                id=user.id,
-                current_user_id=current_user.id,
-            )
-            users_is_subscribed.append(
-                {**dataclasses.asdict(user), 'is_subscribed': is_subscribed},
-            )
+    for user in users:
+        user = services.get_is_subscribed(session, current_user, user)
+        users_is_subscribed.append(user)
     return users_is_subscribed

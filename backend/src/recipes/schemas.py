@@ -30,7 +30,7 @@ class RecipeRead(RecipeReadShort):
     tags: List['TagsRead']
     author: AuthorRead
     ingredients: List['IngredientsFullInRecipeRead']
-    # is_favorited: bool
-    # is_in_shopping_cart: bool
+    is_favorited: bool
+    is_in_shopping_cart: bool
     text: str
     model_config = ConfigDict(from_attributes=True)

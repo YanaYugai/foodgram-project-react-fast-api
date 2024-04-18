@@ -12,7 +12,15 @@ from backend.src.auth.utils import (
     get_password_hash,
     verify_password,
 )
-from backend.src.models import Follow, Recipe, User  # type: ignore
+from backend.src.models import (
+    Cart,
+    Favorite,
+    Follow,
+    IngredientsInRecipe,
+    Recipe,
+    TagsInRecipe,
+    User,
+)
 from backend.src.users.schemas import UserCreation
 
 
@@ -68,6 +76,108 @@ def create_subscribtion(session: Session, id: int, current_user: User):
 """
 
 
+def check_is_subscribed(
+    session: Session,
+    id: int,
+    current_user_id: int,
+) -> bool:
+    is_subscribed = False
+    statement = select(Follow).where(
+        Follow.id == current_user_id,
+        Follow.following_id == id,
+    )
+    subscribtion = session.scalar(statement)
+    if subscribtion is not None:
+        is_subscribed = True
+    return is_subscribed
+
+
+def check_is_favorite_cart(
+    session: Session,
+    id: int,
+    current_user_id: int,
+    model: Any,
+) -> bool:
+    is_cart_favorite = False
+    statement = select(model).where(
+        model.user_id == current_user_id,
+        model.recipe_id == id,
+    )
+    favorite_cart = session.scalar(statement)
+    if favorite_cart is not None:
+        is_cart_favorite = True
+    return is_cart_favorite
+
+
+def create_ingredients_tags_in_recipe(
+    session: Session,
+    ingredients: list[dict[str, int]],
+    tags: list[int],
+    recipe: Any,
+):
+    for ingredient in ingredients:
+        ingredient_recipe = IngredientsInRecipe(
+            recipe_id=recipe.id,
+            ingredient_id=ingredient['id'],
+            amount=ingredient['amount'],
+        )
+        recipe.ingredients.append(ingredient_recipe)
+    for tag in tags:
+        session.add(
+            TagsInRecipe(
+                recipe_id=recipe.id,
+                tag_id=tag,
+            ),
+        )
+    session.commit()
+    session.refresh(recipe)
+    return recipe
+
+
+def get_is_subscribed(session, current_user, user):
+    if current_user is None:
+        is_subscribed = False
+    else:
+        is_subscribed = check_is_subscribed(
+            session=session,
+            id=user.id,
+            current_user_id=current_user.id,
+        )
+    user.is_subscribed = is_subscribed
+    return user
+
+
+def get_is_subs_is_favorited_is_sc(recipe, session, current_user):
+    author = recipe.author
+    if current_user is None:
+        is_subscribed = False
+        is_favorited = False
+        is_in_shopping_cart = False
+    else:
+        is_subscribed = check_is_subscribed(
+            session,
+            id=author.id,
+            current_user_id=current_user.id,
+        )
+        is_favorited = check_is_favorite_cart(
+            session=session,
+            id=recipe.id,
+            current_user_id=current_user.id,
+            model=Favorite,
+        )
+        is_in_shopping_cart = check_is_favorite_cart(
+            session=session,
+            id=recipe.id,
+            current_user_id=current_user.id,
+            model=Cart,
+        )
+    author.is_subscribed = is_subscribed
+    recipe.author = author
+    recipe.is_favorited = is_favorited
+    recipe.is_in_shopping_cart = is_in_shopping_cart
+    return recipe
+
+
 def create_favorite_cart(
     session: Session, id: int, current_user: User, model: Any
 ):
@@ -96,22 +206,6 @@ def get_subscribtion_or_error(session: Session, id: int, current_user_id: int):
             detail='Пользователь не подписан.',
         )
     return subscribtion
-
-
-def check_is_subscribed(
-    session: Session,
-    id: int,
-    current_user_id: int,
-) -> bool:
-    is_subscribed = False
-    statement = select(Follow).where(
-        Follow.id == current_user_id,
-        Follow.following_id == id,
-    )
-    subscribtion = session.scalar(statement)
-    if subscribtion is not None:
-        is_subscribed = True
-    return is_subscribed
 
 
 def delete_object_by_id(
