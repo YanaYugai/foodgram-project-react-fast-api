@@ -10,7 +10,12 @@ def test_add_recipe_favorite(
         f'/api/recipes/{recipe_response.get("id")}/favorite/',
         headers=headers,
     )
+    recipe = response.json()
     assert response.status_code == http.HTTPStatus.CREATED
+    assert "name" in recipe
+    assert "image" in recipe
+    assert "id" in recipe
+    assert "cooking_time" in recipe
 
 
 def test_add_recipe_twice(

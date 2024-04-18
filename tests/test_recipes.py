@@ -28,7 +28,8 @@ def test_create_recipe_correct_credentials(
     assert "image" in recipe
     assert "text" in recipe
     assert "cooking_time" in recipe
-    # assert hasattr(recipe, "is_in_shopping_cart")
+    assert "is_in_shopping_cart" in recipe
+    assert "is_favorited" in recipe
 
 
 def test_create_recipe_bad_request(client, headers: dict[str, str]):
@@ -87,8 +88,18 @@ def test_update_recipe(client, recipe):
             "cooking_time": 1,
         },
     )
+    recipe = response.json()
     assert response.status_code == http.HTTPStatus.OK
-    # assert response.json() == recipes[1]
+    assert "tags" in recipe
+    assert "author" in recipe
+    assert "ingredients" in recipe
+    assert "name" in recipe
+    assert "image" in recipe
+    assert "text" in recipe
+    assert "cooking_time" in recipe
+    assert "is_in_shopping_cart" in recipe
+    assert "is_favorited" in recipe
+    assert response.status_code == http.HTTPStatus.OK
 
 
 def test_update_recipe_uncorrect_value(client, recipe):
