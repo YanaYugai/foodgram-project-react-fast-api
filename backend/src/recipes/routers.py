@@ -38,11 +38,16 @@ def create_recipe(
     session.refresh(recipe)
     recipe_with_ingredients_and_tags = (
         services.create_ingredients_tags_in_recipe(
-            session, ingredients, tags, recipe
+            session=session,
+            ingredients=ingredients,
+            tags=tags,
+            recipe=recipe,
         )
     )
     recipe_correct_response = services.get_is_subs_is_favorited_is_sc(
-        recipe_with_ingredients_and_tags, session, current_user
+        recipe=recipe_with_ingredients_and_tags,
+        session=session,
+        current_user=current_user,
     )
     return recipe_correct_response
 
@@ -63,7 +68,9 @@ def get_recipe(
         token=token,
     )
     recipe = services.get_is_subs_is_favorited_is_sc(
-        recipe, session, current_user
+        recipe=recipe,
+        session=session,
+        current_user=current_user,
     )
     return recipe
 
@@ -81,7 +88,9 @@ def get_recipes(
     recipes = services.get_objects(session=session, model=Recipe)
     for recipe in recipes:
         recipe = services.get_is_subs_is_favorited_is_sc(
-            recipe, session, current_user
+            recipe=recipe,
+            session=session,
+            current_user=current_user,
         )
         recipes_new.append(recipe)
     return recipes_new
@@ -110,11 +119,16 @@ def patch_recipe(
     session.refresh(recipe)
     recipe_with_ingredients_and_tags = (
         services.create_ingredients_tags_in_recipe(
-            session, ingredients, tags, recipe
+            session=session,
+            ingredients=ingredients,
+            tags=tags,
+            recipe=recipe,
         )
     )
     recipe_correct_response = services.get_is_subs_is_favorited_is_sc(
-        recipe_with_ingredients_and_tags, session, current_user
+        recipe=recipe_with_ingredients_and_tags,
+        session=session,
+        current_user=current_user,
     )
     return recipe_correct_response
 
@@ -129,7 +143,9 @@ def add_recipe_to_favorite(
 ):
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
-        id=recipe_id, session=session, model=Recipe
+        id=recipe_id,
+        session=session,
+        model=Recipe,
     )
     services.create_favorite_cart(
         id=recipe.id,
@@ -148,10 +164,13 @@ def delete_recipe_from_favorite(
 ):
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
-        id=recipe_id, session=session, model=Recipe
+        id=recipe_id,
+        session=session,
+        model=Recipe,
     )
     statement = select(Favorite).where(
-        Favorite.recipe_id == recipe.id, Favorite.user_id == current_user.id
+        Favorite.recipe_id == recipe.id,
+        Favorite.user_id == current_user.id,
     )
     favorite = session.scalar(statement)
     if favorite is None:
@@ -177,7 +196,10 @@ def add_recipe_to_cart(
         model=Recipe,
     )
     services.create_favorite_cart(
-        id=recipe.id, session=session, current_user=current_user, model=Cart
+        id=recipe.id,
+        session=session,
+        current_user=current_user,
+        model=Cart,
     )
     return recipe
 
@@ -190,10 +212,13 @@ def delete_recipe_from_cart(
 ):
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
-        id=recipe_id, session=session, model=Recipe
+        id=recipe_id,
+        session=session,
+        model=Recipe,
     )
     statement = select(Cart).where(
-        Cart.recipe_id == recipe.id, Cart.user_id == current_user.id
+        Cart.recipe_id == recipe.id,
+        Cart.user_id == current_user.id,
     )
     cart = session.scalar(statement)
     if cart is None:
@@ -208,11 +233,21 @@ def delete_recipe(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
-    current_user = services.get_current_user(session=session, token=token)
+    current_user = services.get_current_user(
+        session=session,
+        token=token,
+    )
     recipe = services.get_object_by_id_or_error(
         id=recipe_id,
         session=session,
         model=Recipe,
     )
-    services.check_user_is_author(user=current_user, recipe=recipe)
-    services.delete_object_by_id(session=session, id=recipe.id, model=Recipe)
+    services.check_user_is_author(
+        user=current_user,
+        recipe=recipe,
+    )
+    services.delete_object_by_id(
+        session=session,
+        id=recipe.id,
+        model=Recipe,
+    )
