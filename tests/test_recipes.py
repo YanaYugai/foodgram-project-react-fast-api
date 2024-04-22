@@ -152,3 +152,10 @@ def test_delete_nonexistent_recipe(client, recipe):
     )
     assert response.status_code == http.HTTPStatus.NOT_FOUND
     assert response.json() == {"detail": "Страница не найдена."}
+
+
+def test_get_recipes(
+    client,
+) -> None:
+    response = client.get('/api/recipes/?page=2&limit=6')
+    assert response.status_code == http.HTTPStatus.OK

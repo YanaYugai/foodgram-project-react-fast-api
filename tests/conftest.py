@@ -84,6 +84,24 @@ def recipe_data() -> RecipeCreate:
     return recipe_in
 
 
+def recipe_data_function() -> RecipeCreate:
+    image = random_lower_string()
+    name = random_lower_string()
+    text = random_lower_string()
+    cooking_time = 100
+    tags = [1]
+    ingredients = [{"id": 1, "amount": 10}]
+    recipe_in = RecipeCreate(
+        image=image,
+        name=name,
+        text=text,
+        cooking_time=cooking_time,
+        tags=tags,
+        ingredients=ingredients,
+    )
+    return recipe_in
+
+
 @fixture(scope="function")
 def token(
     client,
@@ -135,6 +153,54 @@ def following(
     user_data: UserCreation,
 ):
     user = services.create_user(session=clear_tables, data=user_data)
+    client.post(
+        f'/api/users/{user.id}/subscribe/',
+        headers=headers,
+    )
+    return user.id, headers
+
+
+@fixture(scope="function")
+def following_with_5_recipes(
+    client,
+    headers: dict[str, str],
+    clear_tables: Session,
+    user_data: UserCreation,
+):
+    user = services.create_user(session=clear_tables, data=user_data)
+    login_data = {
+        "username": user.email,
+        "password": user_data.password,
+    }
+    response = client.post('api/token/login/', data=login_data)
+    tokens = response.json()
+    token = tokens["access_token"]
+    headers_user = {"Authorization": f"Token {token}"}
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
     client.post(
         f'/api/users/{user.id}/subscribe/',
         headers=headers,

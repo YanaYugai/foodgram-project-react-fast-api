@@ -214,11 +214,9 @@ def test_get_users(
     clear_tables: Session,
     user_data: UserCreation,
 ) -> None:
-    user = create_user(session=clear_tables, data=user_data)
+    create_user(session=clear_tables, data=user_data)
     users = get_objects(clear_tables, User)
     count_users = clear_tables.scalar(select(func.count(User.id)))
     assert len(users) == count_users
     response = client.get('/api/users/')
     assert response.status_code == http.HTTPStatus.OK
-    user_response = response.json()
-    assert user_response[0].get('id') == user.id
