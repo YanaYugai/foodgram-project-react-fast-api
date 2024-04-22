@@ -7,14 +7,7 @@ from backend.src.ingredients.schemas import (
     IngredientsInRecipe,
 )
 from backend.src.tags.schemas import TagsRead
-from backend.src.users.schemas import AuthorRead
-
-
-class RecipeReadShort(BaseModel):
-    id: int
-    name: str = Field(max_length=200)
-    image: str
-    cooking_time: int = Field(ge=1)
+from backend.src.users.schemas import AuthorRead, RecipeReadShort
 
 
 class RecipeCreate(BaseModel):
@@ -27,10 +20,10 @@ class RecipeCreate(BaseModel):
 
 
 class RecipeRead(RecipeReadShort):
-    tags: List['TagsRead']
+    model_config = ConfigDict(from_attributes=True)
+    tags: list['TagsRead']
     author: AuthorRead
-    ingredients: List['IngredientsFullInRecipeRead']
+    ingredients: list['IngredientsFullInRecipeRead']
     is_favorited: bool
     is_in_shopping_cart: bool
     text: str
-    model_config = ConfigDict(from_attributes=True)

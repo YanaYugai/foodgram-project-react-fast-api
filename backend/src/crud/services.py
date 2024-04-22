@@ -147,6 +147,25 @@ def get_is_subscribed(session, current_user, user):
     return user
 
 
+def get_is_subscribed_count_recipe(session, current_user, user, recipes_limit):
+    is_subscribed = check_is_subscribed(
+        session=session,
+        id=user.id,
+        current_user_id=current_user.id,
+    )
+    user.is_subscribed = is_subscribed
+    recipes = user.recipes
+    recipes_count = len(recipes)
+    user.recipes_count = recipes_count
+    if recipes_limit is not None:
+        try:
+            recipes = recipes[:recipes_limit]
+            user.recipes = recipes
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Неверное значение.")
+    return user
+
+
 def get_is_subs_is_favorited_is_sc(recipe, session, current_user):
     author = recipe.author
     if current_user is None:

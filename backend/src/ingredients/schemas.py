@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class IngredientsInRecipe(BaseModel):
@@ -13,4 +13,5 @@ class IngredientsRead(BaseModel):
 
 
 class IngredientsFullInRecipeRead(IngredientsRead):
+    model_config = ConfigDict(from_attributes=True)
     amount: int

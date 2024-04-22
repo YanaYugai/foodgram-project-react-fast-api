@@ -1,6 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi_paginate import paginate
 from sqlalchemy import select
 
 from backend.database import SessionApi
@@ -11,10 +12,12 @@ from backend.src.auth.utils import (
 )
 from backend.src.crud import services
 from backend.src.models import Follow, User
+from backend.src.recipes.paginator import Page
 from backend.src.users.schemas import (
     AuthorRead,
     UserCreation,
     UserPasswordReset,
+    UserRead,
     UserResponseCreation,
 )
 
@@ -57,13 +60,14 @@ def get_me(
 
 @router.post(
     '/{user_id}/subscribe/',
-    response_model=AuthorRead,
+    response_model=UserRead,
     status_code=201,
 )
 def followed_user(
     user_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
+    recipes_limit: Union[int, None] = 3,
 ):
     user = services.get_object_by_id_or_error(
         id=user_id,
@@ -76,7 +80,12 @@ def followed_user(
         id=user.id,
         current_user=current_user,
     )
-    user = services.get_is_subscribed(session, current_user, user)
+    user = services.get_is_subscribed_count_recipe(
+        session=session,
+        current_user=current_user,
+        user=user,
+        recipes_limit=recipes_limit,
+    )
     return user
 
 
@@ -109,18 +118,21 @@ def unfollowed_user(
     session.commit()
 
 
-@router.get('/subscriptions/', response_model=list[AuthorRead])
+@router.get('/subscriptions/')
 def get_subscription(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+    recipes_limit: Union[int, None] = 3,
+) -> Page[UserRead]:
     current_user = services.get_current_user(session=session, token=token)
     users_is_subscribed = []
     following = current_user.following
     for user in following:
-        user = services.get_is_subscribed(session, current_user, user)
+        user = services.get_is_subscribed_count_recipe(
+            session, current_user, user, recipes_limit
+        )
         users_is_subscribed.append(user)
-    return users_is_subscribed
+    return paginate(users_is_subscribed)
 
 
 @router.get('/{user_id}/', response_model=AuthorRead)
@@ -148,11 +160,11 @@ def post_user(user_data: UserCreation, session: SessionApi):
     return user
 
 
-@router.get('/', response_model=list[AuthorRead])
+@router.get('/')
 def get_users(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme_token_not_necessary)],
-):
+) -> Page[AuthorRead]:
     users = services.get_objects(session=session, model=User)
     users_is_subscribed = []
     current_user = services.get_current_user_without_error(
@@ -162,4 +174,4 @@ def get_users(
     for user in users:
         user = services.get_is_subscribed(session, current_user, user)
         users_is_subscribed.append(user)
-    return users_is_subscribed
+    return paginate(users_is_subscribed)

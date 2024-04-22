@@ -1,6 +1,7 @@
-from typing import Annotated, List
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_paginate import paginate
 from sqlalchemy import select
 
 from backend.database import SessionApi
@@ -10,6 +11,7 @@ from backend.src.auth.utils import (
 )
 from backend.src.crud import services
 from backend.src.models import Cart, Favorite, Recipe
+from backend.src.recipes.paginator import Page
 from backend.src.recipes.schemas import (
     RecipeCreate,
     RecipeRead,
@@ -75,11 +77,11 @@ def get_recipe(
     return recipe
 
 
-@router.get('/', response_model=List[RecipeRead])
+@router.get('/')
 def get_recipes(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme_token_not_necessary)],
-):
+) -> Page[RecipeRead]:
     recipes_new = []
     current_user = services.get_current_user_without_error(
         session=session,
@@ -93,7 +95,8 @@ def get_recipes(
             current_user=current_user,
         )
         recipes_new.append(recipe)
-    return recipes_new
+
+    return paginate(recipes_new)
 
 
 @router.patch('/{recipe_id}/', response_model=RecipeRead)
