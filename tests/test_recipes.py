@@ -157,5 +157,22 @@ def test_delete_nonexistent_recipe(client, recipe):
 def test_get_recipes(
     client,
 ) -> None:
-    response = client.get('/api/recipes/?page=2&limit=6')
+    response = client.get('/api/recipes/?author=1&tags=dinner&is_favorited=0')
+    print(response.json())
+    assert response.status_code == http.HTTPStatus.OK
+
+
+def test_get_recipes_favorited(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
+    )
+    response = client.get(
+        '/api/recipes/?is_favorited=1',
+        headers=headers,
+    )
     assert response.status_code == http.HTTPStatus.OK

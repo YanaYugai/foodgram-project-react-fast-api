@@ -89,7 +89,7 @@ def recipe_data_function() -> RecipeCreate:
     name = random_lower_string()
     text = random_lower_string()
     cooking_time = 100
-    tags = [1]
+    tags = [2]
     ingredients = [{"id": 1, "amount": 10}]
     recipe_in = RecipeCreate(
         image=image,
