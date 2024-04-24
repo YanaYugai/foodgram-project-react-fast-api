@@ -1,6 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Union
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi_filter import FilterDepends
 from fastapi_paginate import paginate
 from sqlalchemy import select
 
@@ -10,7 +11,8 @@ from backend.src.auth.utils import (
     oauth2_scheme_token_not_necessary,
 )
 from backend.src.crud import services
-from backend.src.models import Cart, Favorite, Recipe
+from backend.src.models import Cart, Favorite, Recipe, Tag
+from backend.src.recipes.filters import RecipeFilter
 from backend.src.recipes.paginator import Page
 from backend.src.recipes.schemas import (
     RecipeCreate,
@@ -81,13 +83,31 @@ def get_recipe(
 def get_recipes(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme_token_not_necessary)],
+    recipe_filter: RecipeFilter = FilterDepends(RecipeFilter),
+    tags: Annotated[Union[list[str], None], Query()] = None,
+    is_favorited: Union[int, None] = None,
+    is_in_shopping_cart: Union[int, None] = None,
 ) -> Page[RecipeRead]:
     recipes_new = []
     current_user = services.get_current_user_without_error(
         session=session,
         token=token,
     )
-    recipes = services.get_objects(session=session, model=Recipe)
+    recipes = (
+        select(Recipe)
+        .join(Recipe.tags)
+        .outerjoin(Recipe.in_favorites)  # type: ignore
+        .outerjoin(Recipe.in_shopping_cart)  # type: ignore
+    )
+    queryset = recipe_filter.filter(recipes)
+    if tags is not None:
+        for tag in tags:
+            queryset = queryset.filter(Tag.slug == tag)
+    queryset = services.filter_cart_favorite(
+        current_user, queryset, is_in_shopping_cart, is_favorited
+    )
+    result = session.execute(queryset)
+    recipes = result.scalars().all()
     for recipe in recipes:
         recipe = services.get_is_subs_is_favorited_is_sc(
             recipe=recipe,
@@ -95,7 +115,6 @@ def get_recipes(
             current_user=current_user,
         )
         recipes_new.append(recipe)
-
     return paginate(recipes_new)
 
 

@@ -109,6 +109,16 @@ class Recipe(Base):
         init=False,
         cascade="all, delete",
     )
+    in_favorites: Mapped[List["Favorite"]] = relationship(
+        "Favorite",
+        init=False,
+        cascade="all, delete",
+    )
+    in_shopping_cart: Mapped[List["Cart"]] = relationship(
+        "Cart",
+        init=False,
+        cascade="all, delete",
+    )
 
 
 class Tag(Base):

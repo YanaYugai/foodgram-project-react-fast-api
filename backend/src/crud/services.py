@@ -109,6 +109,22 @@ def check_is_favorite_cart(
     return is_cart_favorite
 
 
+def filter_cart_favorite(
+    current_user, queryset, is_in_shopping_cart, is_favorited
+):
+    print(is_in_shopping_cart, is_favorited)
+    if current_user is not None:
+        if is_in_shopping_cart:
+            queryset = queryset.filter(Cart.user_id == current_user.id)
+            print("is_in_shopping_cart")
+        if is_favorited:
+            queryset = queryset.filter(Favorite.user_id == current_user.id)
+            print("is_in_shopping_cart")
+    print("111")
+    print(queryset)
+    return queryset
+
+
 def create_ingredients_tags_in_recipe(
     session: Session,
     ingredients: list[dict[str, int]],
