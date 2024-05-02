@@ -19,6 +19,10 @@ class RecipeCreate(BaseModel):
     name: str = Field(max_length=200)
 
 
+class RecipeIngredients(BaseModel):
+    ingredients: List['IngredientsInRecipe']
+
+
 class RecipeRead(RecipeReadShort):
     model_config = ConfigDict(from_attributes=True)
     tags: list['TagsRead']

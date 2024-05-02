@@ -18,6 +18,18 @@ def test_add_recipe_correct_credentials(
     assert "cooking_time" in recipe
 
 
+def test_get_recipe_correct_credentials(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
+    response = client.get(
+        '/api/recipes/download_shopping_cart/',
+        headers=headers,
+    )
+    assert response.status_code == http.HTTPStatus.CREATED
+
+
 def test_add_recipe_twice(
     client,
     recipe,

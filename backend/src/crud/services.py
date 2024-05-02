@@ -2,6 +2,7 @@ from http import HTTPStatus
 from typing import Any, Optional
 
 from fastapi import HTTPException, status
+from fpdf import FPDF
 from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -112,17 +113,25 @@ def check_is_favorite_cart(
 def filter_cart_favorite(
     current_user, queryset, is_in_shopping_cart, is_favorited
 ):
-    print(is_in_shopping_cart, is_favorited)
     if current_user is not None:
         if is_in_shopping_cart:
             queryset = queryset.filter(Cart.user_id == current_user.id)
-            print("is_in_shopping_cart")
         if is_favorited:
             queryset = queryset.filter(Favorite.user_id == current_user.id)
-            print("is_in_shopping_cart")
-    print("111")
-    print(queryset)
     return queryset
+
+
+def download_shopping_list(ingredients):
+    ing_list = [
+        f'{ing.name} ' f'({ing.measurement_unit}) - {ing.amount}'
+        for ing in ingredients
+    ]
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font('Arial', 'B', 16)
+    for ingredient in ing_list:
+        pdf.cell(0, 10, ingredient, 0, 1)
+    return pdf.output()
 
 
 def create_ingredients_tags_in_recipe(

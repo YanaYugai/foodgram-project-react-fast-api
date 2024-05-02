@@ -1,6 +1,6 @@
 from typing import Annotated, Union
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi_filter import FilterDepends
 from fastapi_paginate import paginate
 from sqlalchemy import select
@@ -16,6 +16,7 @@ from backend.src.recipes.filters import RecipeFilter
 from backend.src.recipes.paginator import Page
 from backend.src.recipes.schemas import (
     RecipeCreate,
+    RecipeIngredients,
     RecipeRead,
     RecipeReadShort,
 )
@@ -54,6 +55,26 @@ def create_recipe(
         current_user=current_user,
     )
     return recipe_correct_response
+
+
+@router.get('/download_shopping_cart/')
+def download_recipe_to_cart(
+    session: SessionApi,
+    token: Annotated[str, Depends(oauth2_scheme)],
+):
+    current_user = services.get_current_user(session=session, token=token)
+    recipes = select(Recipe).join(Recipe.in_shopping_cart)
+    queryset = recipes.filter(Cart.user_id == current_user.id)  # type: ignore
+    result = session.execute(queryset)
+    recipes = result.scalars().all()
+    ingredients = [RecipeIngredients(**recipe) for recipe in recipes]
+    pdf = services.download_shopping_list(ingredients)
+    headers = {'Content-Disposition': 'inline; filename="ingredients.pdf"'}
+    return Response(
+        bytes(pdf, encoding='utf8'),
+        headers=headers,
+        media_type='application/pdf',
+    )
 
 
 @router.get('/{recipe_id}/', response_model=RecipeRead)
