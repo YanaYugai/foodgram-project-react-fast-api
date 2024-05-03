@@ -26,7 +26,7 @@ def test_get_recipe_correct_credentials(
         '/api/recipes/download_shopping_cart/',
         headers=cart_with_5_recipes,
     )
-    assert response.status_code == http.HTTPStatus.CREATED
+    assert response.status_code == http.HTTPStatus.OK
 
 
 def test_add_recipe_twice(

@@ -13,7 +13,12 @@ def test_create_recipe_correct_credentials(
                 {"id": 11, "amount": 10},
             ],
             "tags": [1, 2],
-            "image": "data:image/png",
+            "image": "data:image/png;base64,\n"
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAA\n"
+            "AACVBMVEUAAAD///9fX1/\n"
+            "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQ\n"
+            "ImWNoAAAAggCByx\n"
+            "OyYQAAAABJRU5ErkJggg==",
             "name": "string",
             "text": "string",
             "cooking_time": 1,
@@ -38,7 +43,12 @@ def test_create_recipe_bad_request(client, headers: dict[str, str]):
         headers=headers,
         json={
             "tags": [1],
-            "image": "data:image/png;base64,",
+            "image": "data:image/png;base64,\n"
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAA\n"
+            "AACVBMVEUAAAD///9fX1/\n"
+            "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQ\n"
+            "ImWNoAAAAggCByx\n"
+            "OyYQAAAABJRU5ErkJggg==",
             "name": "string",
             "text": "string",
             "cooking_time": 1,
@@ -55,7 +65,12 @@ def test_create_recipe_failure(client):
         json={
             "ingredients": [{"id": 11, "amount": 10}],
             "tags": [2],
-            "image": "data:image/png;base64,",
+            "image": "data:image/png;base64,\n"
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAA\n"
+            "AACVBMVEUAAAD///9fX1/\n"
+            "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQ\n"
+            "ImWNoAAAAggCByx\n"
+            "OyYQAAAABJRU5ErkJggg==",
             "name": "string",
             "text": "string",
             "cooking_time": 1,
@@ -82,7 +97,12 @@ def test_update_recipe(client, recipe):
         json={
             "ingredients": [{"id": 1123, "amount": 10}],
             "tags": [3],
-            "image": "data:image/png;base64,",
+            "image": "data:image/png;base64,\n"
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAA\n"
+            "AACVBMVEUAAAD///9fX1/\n"
+            "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQ\n"
+            "ImWNoAAAAggCByx\n"
+            "OyYQAAAABJRU5ErkJggg==",
             "name": "string",
             "text": "string",
             "cooking_time": 1,
@@ -111,7 +131,12 @@ def test_update_recipe_uncorrect_value(client, recipe):
         json={
             "ingredients": [{"id": 112, "amount": 0}],
             "tags": [3],
-            "image": "data:image/png;base64,",
+            "image": "data:image/png;base64,\n"
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAA\n"
+            "AACVBMVEUAAAD///9fX1/\n"
+            "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQ\n"
+            "ImWNoAAAAggCByx\n"
+            "OyYQAAAABJRU5ErkJggg==",
             "name": "string",
             "text": "string",
             "cooking_time": 0,

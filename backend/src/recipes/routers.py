@@ -44,7 +44,13 @@ def create_recipe(
     recipe_data = recipe_data.model_dump()
     ingredients = recipe_data.pop('ingredients')
     tags = recipe_data.pop('tags')
-    recipe = Recipe(**recipe_data, author_id=current_user.id)
+    image = recipe_data.pop('image')
+    picture_path = services.formate_image(image)
+    recipe = Recipe(
+        **recipe_data,
+        author_id=current_user.id,
+        image=picture_path,
+    )
     session.add(recipe)
     session.commit()
     session.refresh(recipe)
@@ -151,7 +157,10 @@ def get_recipes(
         for tag in tags:
             queryset = queryset.filter(Tag.slug == tag)
     queryset = services.filter_cart_favorite(
-        current_user, queryset, is_in_shopping_cart, is_favorited
+        current_user,
+        queryset,
+        is_in_shopping_cart,
+        is_favorited,
     )
     result = session.execute(queryset)
     recipes = result.scalars().all()
@@ -182,7 +191,13 @@ def patch_recipe(
     ingredients = recipe_data.pop('ingredients')
     tags = recipe_data.pop('tags')
     services.check_user_is_author(user=current_user, recipe=recipe)
-    recipe = Recipe(**recipe_data, author_id=current_user.id)
+    image = recipe_data.pop('image')
+    picture_path = services.formate_image(image)
+    recipe = Recipe(
+        **recipe_data,
+        author_id=current_user.id,
+        image=picture_path,
+    )
     session.add(recipe)
     session.commit()
     session.refresh(recipe)
@@ -203,7 +218,9 @@ def patch_recipe(
 
 
 @router.post(
-    '/{recipe_id}/favorite/', response_model=RecipeReadShort, status_code=201
+    '/{recipe_id}/favorite/',
+    response_model=RecipeReadShort,
+    status_code=201,
 )
 def add_recipe_to_favorite(
     recipe_id: int,

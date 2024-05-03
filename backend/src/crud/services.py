@@ -1,3 +1,7 @@
+import base64
+import os
+import random
+import string
 from http import HTTPStatus
 from typing import Any, Optional
 
@@ -23,6 +27,10 @@ from backend.src.models import (
     User,
 )
 from backend.src.users.schemas import UserCreation
+
+
+def random_lower_string() -> str:
+    return "".join(random.choices(string.ascii_lowercase, k=8))
 
 
 def get_object_by_id_or_error(id: int, session: Session, model: Any):
@@ -111,7 +119,10 @@ def check_is_favorite_cart(
 
 
 def filter_cart_favorite(
-    current_user, queryset, is_in_shopping_cart, is_favorited
+    current_user,
+    queryset,
+    is_in_shopping_cart,
+    is_favorited,
 ):
     if current_user is not None:
         if is_in_shopping_cart:
@@ -125,7 +136,10 @@ def download_shopping_list(ingredients):
     ing_list = [f'{ing[1]} ' f'({ing[2]}) - {ing[0]}' for ing in ingredients]
     pdf = FPDF()
     pdf.add_font(
-        'DejaVu', style="", fname="../data/DejaVuSansCondensed.ttf", uni=True
+        'DejaVu',
+        style="",
+        fname="../data/DejaVuSansCondensed.ttf",
+        uni=True,
     )
     pdf.add_page()
     pdf.set_font('DejaVu', '', 14)
@@ -133,6 +147,20 @@ def download_shopping_list(ingredients):
         pdf.write(8, ingredient)
         pdf.ln(8)
     return pdf.output(dest='S').encode('utf-8')
+
+
+def formate_image(image):
+    format, imgstr = image.split(';base64,')
+    ext = format.split('/')[-1]
+    data = base64.b64decode(imgstr)
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    dirname = os.path.join(BASE_DIR, 'static/job')
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    picture_path = os.path.join(dirname, f'{random_lower_string()}.' + ext)
+    with open(picture_path, "wb") as f:
+        f.write(data)
+    return picture_path
 
 
 def create_ingredients_tags_in_recipe(
@@ -224,7 +252,10 @@ def get_is_subs_is_favorited_is_sc(recipe, session, current_user):
 
 
 def create_favorite_cart(
-    session: Session, id: int, current_user: User, model: Any
+    session: Session,
+    id: int,
+    current_user: User,
+    model: Any,
 ):
     statement = select(model).where(
         model.user_id == current_user.id,

@@ -67,7 +67,10 @@ def user_data() -> UserCreation:
 
 @fixture(scope="function")
 def recipe_data() -> RecipeCreate:
-    image = random_lower_string()
+    image = "data:image/png;base64,\n"
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/\n"
+    "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByx\n"
+    "OyYQAAAABJRU5ErkJggg=="
     name = random_lower_string()
     text = random_lower_string()
     cooking_time = 100
@@ -85,7 +88,10 @@ def recipe_data() -> RecipeCreate:
 
 
 def recipe_data_function() -> RecipeCreate:
-    image = random_lower_string()
+    image = "data:image/png;base64,\n"
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/\n"
+    "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByx\n"
+    "OyYQAAAABJRU5ErkJggg=="
     name = random_lower_string()
     text = random_lower_string()
     cooking_time = 100
