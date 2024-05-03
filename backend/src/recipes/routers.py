@@ -1,9 +1,10 @@
+import io
 from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi_filter import FilterDepends
 from fastapi_paginate import paginate
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from backend.database import SessionApi
 from backend.src.auth.utils import (
@@ -11,12 +12,18 @@ from backend.src.auth.utils import (
     oauth2_scheme_token_not_necessary,
 )
 from backend.src.crud import services
-from backend.src.models import Cart, Favorite, Recipe, Tag
+from backend.src.models import (
+    Cart,
+    Favorite,
+    Ingredient,
+    IngredientsInRecipe,
+    Recipe,
+    Tag,
+)
 from backend.src.recipes.filters import RecipeFilter
 from backend.src.recipes.paginator import Page
 from backend.src.recipes.schemas import (
     RecipeCreate,
-    RecipeIngredients,
     RecipeRead,
     RecipeReadShort,
 )
@@ -63,15 +70,34 @@ def download_recipe_to_cart(
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
     current_user = services.get_current_user(session=session, token=token)
-    recipes = select(Recipe).join(Recipe.in_shopping_cart)
-    queryset = recipes.filter(Cart.user_id == current_user.id)  # type: ignore
-    result = session.execute(queryset)
-    recipes = result.scalars().all()
-    ingredients = [RecipeIngredients(**recipe) for recipe in recipes]
+    ingredients = (
+        session.query(
+            func.sum(IngredientsInRecipe.amount),
+            Ingredient.name,
+            Ingredient.measurement_unit,
+        )
+        .join(
+            Recipe.ingredients,
+        )
+        .join(
+            Recipe.in_shopping_cart,
+        )
+        .join(
+            IngredientsInRecipe.ingredient,
+        )
+        .group_by(
+            Ingredient.name,
+            Ingredient.measurement_unit,
+        )
+        .filter(Cart.user_id == current_user.id)
+        .all()
+    )
     pdf = services.download_shopping_list(ingredients)
-    headers = {'Content-Disposition': 'inline; filename="ingredients.pdf"'}
+    pdf_buff = io.BytesIO(pdf)
+    pdf_bytes = pdf_buff.getvalue()
+    headers = {'Content-Disposition': 'attachment; filename="ingredients.pdf"'}
     return Response(
-        bytes(pdf, encoding='utf8'),
+        pdf_bytes,
         headers=headers,
         media_type='application/pdf',
     )

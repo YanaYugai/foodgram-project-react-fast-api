@@ -72,7 +72,7 @@ def recipe_data() -> RecipeCreate:
     text = random_lower_string()
     cooking_time = 100
     tags = [1]
-    ingredients = [{"id": 1, "amount": 10}]
+    ingredients = [{"id": 1, "amount": 10}, {"id": 3, "amount": 10}]
     recipe_in = RecipeCreate(
         image=image,
         name=name,
@@ -90,7 +90,11 @@ def recipe_data_function() -> RecipeCreate:
     text = random_lower_string()
     cooking_time = 100
     tags = [2]
-    ingredients = [{"id": 1, "amount": 10}]
+    ingredients = [
+        {"id": 1, "amount": 10},
+        {"id": 10, "amount": 10},
+        {"id": 11, "amount": 10},
+    ]
     recipe_in = RecipeCreate(
         image=image,
         name=name,
@@ -206,6 +210,70 @@ def following_with_5_recipes(
         headers=headers,
     )
     return user.id, headers
+
+
+@fixture(scope="function")
+def cart_with_5_recipes(
+    client,
+    headers: dict[str, str],
+    clear_tables: Session,
+    user_data: UserCreation,
+):
+    user = services.create_user(session=clear_tables, data=user_data)
+    login_data = {
+        "username": user.email,
+        "password": user_data.password,
+    }
+    response = client.post('api/token/login/', data=login_data)
+    tokens = response.json()
+    token = tokens["access_token"]
+    headers_user = {"Authorization": f"Token {token}"}
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        '/api/recipes/1/shopping_cart/',
+        headers=headers,
+    )
+    client.post(
+        '/api/recipes/2/shopping_cart/',
+        headers=headers,
+    )
+    client.post(
+        '/api/recipes/3/shopping_cart/',
+        headers=headers,
+    )
+    client.post(
+        '/api/recipes/4/shopping_cart/',
+        headers=headers,
+    )
+    client.post(
+        '/api/recipes/5/shopping_cart/',
+        headers=headers,
+    )
+    return headers
 
 
 @fixture(scope="function")

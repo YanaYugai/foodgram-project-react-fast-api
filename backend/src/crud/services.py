@@ -122,16 +122,17 @@ def filter_cart_favorite(
 
 
 def download_shopping_list(ingredients):
-    ing_list = [
-        f'{ing.name} ' f'({ing.measurement_unit}) - {ing.amount}'
-        for ing in ingredients
-    ]
+    ing_list = [f'{ing[1]} ' f'({ing[2]}) - {ing[0]}' for ing in ingredients]
     pdf = FPDF()
+    pdf.add_font(
+        'DejaVu', style="", fname="../data/DejaVuSansCondensed.ttf", uni=True
+    )
     pdf.add_page()
-    pdf.set_font('Arial', 'B', 16)
+    pdf.set_font('DejaVu', '', 14)
     for ingredient in ing_list:
-        pdf.cell(0, 10, ingredient, 0, 1)
-    return pdf.output()
+        pdf.write(8, ingredient)
+        pdf.ln(8)
+    return pdf.output(dest='S').encode('utf-8')
 
 
 def create_ingredients_tags_in_recipe(

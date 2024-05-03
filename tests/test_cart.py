@@ -20,12 +20,11 @@ def test_add_recipe_correct_credentials(
 
 def test_get_recipe_correct_credentials(
     client,
-    recipe,
+    cart_with_5_recipes,
 ):
-    recipe_response, headers = recipe
     response = client.get(
         '/api/recipes/download_shopping_cart/',
-        headers=headers,
+        headers=cart_with_5_recipes,
     )
     assert response.status_code == http.HTTPStatus.CREATED
 
