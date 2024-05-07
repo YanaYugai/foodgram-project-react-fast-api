@@ -1,27 +1,47 @@
 import http
 
 
-# TODO: when db will be ready add assert response.json
-def test_add_recipe(client):
+def test_add_recipe_favorite(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
     response = client.post(
-        '/api/recipes/1/favorite/',
-        headers={"Authorization": "Token TOKENVALUE"},
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
     )
+    recipe = response.json()
     assert response.status_code == http.HTTPStatus.CREATED
+    assert "name" in recipe
+    assert "image" in recipe
+    assert "id" in recipe
+    assert "cooking_time" in recipe
 
 
-def test_add_recipe_twice(client):
+def test_add_recipe_twice(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
     response = client.post(
-        '/api/recipes/1/favorite/',
-        headers={"Authorization": "Token TOKENVALUE"},
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
+    )
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {"errors": "string"}
+    assert response.json() == {'detail': 'Некорректные данные.'}
 
 
-def test_add_recipe_failure_credentials(client):
+def test_add_recipe_failure_credentials(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
     response = client.post(
-        '/api/recipes/2/favorite/',
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
         headers={"Authorization": "Token invalid_token"},
     )
     assert response.status_code == http.HTTPStatus.UNAUTHORIZED
@@ -30,33 +50,57 @@ def test_add_recipe_failure_credentials(client):
     }
 
 
-def test_delete_recipe(client):
+def test_delete_recipe(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
+    )
     response = client.delete(
-        '/api/recipes/1/favorite/',
-        headers={"Authorization": "Token TOKENVALUE"},
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
     )
     assert response.status_code == http.HTTPStatus.NO_CONTENT
 
 
-def test_delete_recipe_twice(client):
+def test_delete_recipe_twice(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
+    )
     response = client.delete(
-        '/api/recipes/1/favorite/',
-        headers={"Authorization": "Token TOKENVALUE"},
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
+    )
+    response = client.delete(
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
-    assert response.json() == {"errors": "string"}
+    assert response.json() == {'detail': 'Рецепта нет в избранном.'}
 
 
-def test_delete_recipe_failure_credentials(client):
+def test_delete_recipe_failure_credentials(
+    client,
+    recipe,
+):
+    recipe_response, headers = recipe
+    response = client.post(
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
+        headers=headers,
+    )
     response = client.delete(
-        '/api/recipes/2/favorite/',
+        f'/api/recipes/{recipe_response.get("id")}/favorite/',
         headers={"Authorization": "Token invalid_token"},
     )
     assert response.status_code == http.HTTPStatus.UNAUTHORIZED
     assert response.json() == {
         "detail": "Учетные данные не были предоставлены.",
     }
-
-
-def test_get_favorites(client):
-    raise NotImplementedError

@@ -1,6 +1,7 @@
 from typing import Annotated, List
 
 from sqlalchemy import ForeignKey, String, UniqueConstraint
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base  # type: ignore
@@ -15,34 +16,57 @@ recipe_id = Annotated[int, mapped_column(ForeignKey("recipe.id"))]
 
 class TagsInRecipe(Base):
     __tablename__ = "tagsinrecipe"
-    __table_args__ = (UniqueConstraint("recipe_id", "tag_id"),)
 
-    id: Mapped[intpk] = mapped_column(init=False)
-    recipe_id: Mapped[recipe_id]
-    tag_id: Mapped[int] = mapped_column(ForeignKey("tag.id"))
+    recipe_id: Mapped[int] = mapped_column(
+        ForeignKey("recipe.id"),
+        primary_key=True,
+    )
+    tag_id: Mapped[int] = mapped_column(ForeignKey("tag.id"), primary_key=True)
 
 
 class IngredientsInRecipe(Base):
     __tablename__ = "ingredientsinrecipe"
-    __table_args__ = (UniqueConstraint("recipe_id", "ingredient_id"),)
 
-    id: Mapped[intpk] = mapped_column(init=False)
-    recipe_id: Mapped[recipe_id]
-    ingredient_id: Mapped[int] = mapped_column(ForeignKey("ingredient.id"))
-    recipe: Mapped["Recipe"] = relationship(
-        "Recipe",
-        back_populates="ingredients_in_recipe",
+    recipe_id: Mapped[int] = mapped_column(
+        ForeignKey("recipe.id"),
+        primary_key=True,
+    )
+    ingredient_id: Mapped[int] = mapped_column(
+        ForeignKey("ingredient.id"),
+        primary_key=True,
+        confirm_deleted_rows=False,
     )
     amount: Mapped[int]
+    ingredient: Mapped["Ingredient"] = relationship(
+        "Ingredient",
+        # back_populates="ingredients_in_recipe",
+        init=False,
+    )
+    id: AssociationProxy[int] = association_proxy(
+        "ingredient",
+        "id",
+        init=False,
+    )
+    name: AssociationProxy[str200] = association_proxy(
+        "ingredient",
+        "name",
+        init=False,
+    )
+    measurement_unit: AssociationProxy[str200] = association_proxy(
+        "ingredient",
+        "measurement_unit",
+        init=False,
+    )
 
 
-"""
 class RecipeUserMixin:
-    __table_args__ = (UniqueConstraint("recipe_id", "user_id"),)
 
-    id: Mapped[intpk] = mapped_column(init=False)
-    recipe_id: Mapped[recipe_id]
-    user_id: Mapped[user_fk]
+    recipe_id: Mapped[int] = mapped_column(
+        ForeignKey("recipe.id"), primary_key=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"), primary_key=True
+    )
 
 
 class Cart(RecipeUserMixin, Base):
@@ -51,7 +75,14 @@ class Cart(RecipeUserMixin, Base):
 
 class Favorite(RecipeUserMixin, Base):
     __tablename__ = "favorite"
-"""
+
+
+class Ingredient(Base):
+    __tablename__ = "ingredient"
+
+    id: Mapped[intpk] = mapped_column(init=False)
+    name: Mapped[str200]
+    measurement_unit: Mapped[str200]
 
 
 class Recipe(Base):
@@ -60,29 +91,34 @@ class Recipe(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(255))
     text: Mapped[str]
-    # author_id: Mapped[user_fk]
+    author_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
     image: Mapped[str]
     cooking_time: Mapped[int]
-    # author: Mapped["User"] = relationship('User', back_populates="recipes")
+    author: Mapped["User"] = relationship(
+        'User',
+        back_populates="recipes",
+        init=False,
+    )
     tags: Mapped[List["Tag"]] = relationship(
         "Tag",
         secondary="tagsinrecipe",
-        back_populates="recipes",
+        init=False,
     )
-    ingredients_in_recipe: Mapped[List["IngredientsInRecipe"]] = relationship(
+    ingredients: Mapped[List["IngredientsInRecipe"]] = relationship(
         "IngredientsInRecipe",
-        back_populates="recipe",
+        init=False,
+        cascade="all, delete",
     )
-    ingredients: Mapped[List["Ingredient"]] = relationship(
-        secondary="ingredientsinrecipe",
-        back_populates="recipes",
+    in_favorites: Mapped[List["Favorite"]] = relationship(
+        "Favorite",
+        init=False,
+        cascade="all, delete",
     )
-    # in_favorite: Mapped[List['User']] = relationship(
-    #    secondary=lambda: Favorite, back_populates='recipes_in_favorite',
-    # )
-    # in_cart: Mapped[List['User']] = relationship(
-    #    secondary=lambda: Cart, back_populates='recipes_in_cart',
-    # )
+    in_shopping_cart: Mapped[List["Cart"]] = relationship(
+        "Cart",
+        init=False,
+        cascade="all, delete",
+    )
 
 
 class Tag(Base):
@@ -92,24 +128,6 @@ class Tag(Base):
     name: Mapped[str200]
     color: Mapped[str] = mapped_column(String(7))
     slug: Mapped[str] = mapped_column(String(200), unique=True)
-    recipes: Mapped[List["Recipe"]] = relationship(
-        "Recipe",
-        secondary="tagsinrecipe",
-        back_populates="tags",
-    )
-
-
-class Ingredient(Base):
-    __tablename__ = "ingredient"
-
-    id: Mapped[intpk] = mapped_column(init=False)
-    name: Mapped[str200]
-    measurement_unit: Mapped[str200]
-    recipes: Mapped[List["Recipe"]] = relationship(
-        "Recipe",
-        secondary="ingredientsinrecipe",
-        back_populates="ingredients",
-    )
 
 
 class Follow(Base):
@@ -138,6 +156,12 @@ class User(Base):
         backref="following",
         init=False,
     )
+    recipes: Mapped[List["Recipe"]] = relationship(
+        'Recipe',
+        back_populates='author',
+        cascade="all, delete-orphan",
+        init=False,
+    )
 
 
 class Token(Base):
@@ -146,16 +170,3 @@ class Token(Base):
     id: Mapped[intpk] = mapped_column(init=False)
     access_token: Mapped[str]
     token_type: Mapped[str] = mapped_column(default="bearer")
-
-
-"""
-    recipes: Mapped[List["Recipe"]] = relationship(
-        'Recipe', back_populates='author', cascade="all, delete-orphan",
-    )
-    recipes_in_favorite: Mapped[List['Recipe']] = relationship(
-        'Recipe', secondary=lambda: Favorite, back_populates='in_favorite',
-    )
-    recipes_in_cart: Mapped[List['Recipe']] = relationship(
-        'Recipe', secondary=lambda: Cart, back_populates='in_cart',
-    )
-"""

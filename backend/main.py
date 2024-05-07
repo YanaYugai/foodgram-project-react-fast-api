@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi_paginate import add_pagination
 
 from backend.src.auth import routers as auth
 from backend.src.ingredients import routers as ingredients
@@ -27,3 +28,4 @@ app.include_router(ingredients.router)
 app.include_router(tags.router)
 app.include_router(users.router)
 app.include_router(auth.router)
+add_pagination(app)

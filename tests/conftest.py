@@ -11,6 +11,7 @@ from backend.database import engine
 from backend.main import app
 from backend.src.crud import services
 from backend.src.models import Base
+from backend.src.recipes.schemas import RecipeCreate
 from backend.src.users.schemas import UserCreation
 
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -34,9 +35,10 @@ def session() -> Generator:
 def clear_tables(session) -> Generator:
     yield session
     for table in Base.metadata.sorted_tables:
-        session.execute(
-            text(f'TRUNCATE "{table.name}" RESTART IDENTITY CASCADE;'),
-        )
+        if table.name not in ('ingredient', 'tag'):
+            session.execute(
+                text(f'TRUNCATE "{table.name}" RESTART IDENTITY CASCADE;'),
+            )
     session.commit()
 
 
@@ -61,6 +63,53 @@ def user_data() -> UserCreation:
         last_name=last_name,
     )
     return user_in
+
+
+@fixture(scope="function")
+def recipe_data() -> RecipeCreate:
+    image = "data:image/png;base64,\n"
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/\n"
+    "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByx\n"
+    "OyYQAAAABJRU5ErkJggg=="
+    name = random_lower_string()
+    text = random_lower_string()
+    cooking_time = 100
+    tags = [1]
+    ingredients = [{"id": 1, "amount": 10}, {"id": 3, "amount": 10}]
+    recipe_in = RecipeCreate(
+        image=image,
+        name=name,
+        text=text,
+        cooking_time=cooking_time,
+        tags=tags,
+        ingredients=ingredients,
+    )
+    return recipe_in
+
+
+def recipe_data_function() -> RecipeCreate:
+    image = "data:image/png;base64,\n"
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/\n"
+    "S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByx\n"
+    "OyYQAAAABJRU5ErkJggg=="
+    name = random_lower_string()
+    text = random_lower_string()
+    cooking_time = 100
+    tags = [2]
+    ingredients = [
+        {"id": 1, "amount": 10},
+        {"id": 10, "amount": 10},
+        {"id": 11, "amount": 10},
+    ]
+    recipe_in = RecipeCreate(
+        image=image,
+        name=name,
+        text=text,
+        cooking_time=cooking_time,
+        tags=tags,
+        ingredients=ingredients,
+    )
+    return recipe_in
 
 
 @fixture(scope="function")
@@ -119,3 +168,130 @@ def following(
         headers=headers,
     )
     return user.id, headers
+
+
+@fixture(scope="function")
+def following_with_5_recipes(
+    client,
+    headers: dict[str, str],
+    clear_tables: Session,
+    user_data: UserCreation,
+):
+    user = services.create_user(session=clear_tables, data=user_data)
+    login_data = {
+        "username": user.email,
+        "password": user_data.password,
+    }
+    response = client.post('api/token/login/', data=login_data)
+    tokens = response.json()
+    token = tokens["access_token"]
+    headers_user = {"Authorization": f"Token {token}"}
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        f'/api/users/{user.id}/subscribe/',
+        headers=headers,
+    )
+    return user.id, headers
+
+
+@fixture(scope="function")
+def cart_with_5_recipes(
+    client,
+    headers: dict[str, str],
+    clear_tables: Session,
+    user_data: UserCreation,
+):
+    user = services.create_user(session=clear_tables, data=user_data)
+    login_data = {
+        "username": user.email,
+        "password": user_data.password,
+    }
+    response = client.post('api/token/login/', data=login_data)
+    tokens = response.json()
+    token = tokens["access_token"]
+    headers_user = {"Authorization": f"Token {token}"}
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        url="/api/recipes/",
+        headers=headers_user,
+        json=recipe_data_function().model_dump(),
+    )
+    client.post(
+        '/api/recipes/1/shopping_cart/',
+        headers=headers,
+    )
+    client.post(
+        '/api/recipes/2/shopping_cart/',
+        headers=headers,
+    )
+    client.post(
+        '/api/recipes/3/shopping_cart/',
+        headers=headers,
+    )
+    client.post(
+        '/api/recipes/4/shopping_cart/',
+        headers=headers,
+    )
+    client.post(
+        '/api/recipes/5/shopping_cart/',
+        headers=headers,
+    )
+    return headers
+
+
+@fixture(scope="function")
+def recipe(
+    client,
+    headers: dict[str, str],
+    recipe_data: RecipeCreate,
+):
+    response = client.post(
+        url="/api/recipes/",
+        headers=headers,
+        json=recipe_data.model_dump(),
+    )
+    recipe = response.json()
+    return recipe, headers

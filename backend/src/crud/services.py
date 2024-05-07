@@ -1,22 +1,36 @@
+import base64
+import os
+import random
+import string
 from http import HTTPStatus
 from typing import Any, Optional
 
 from fastapi import HTTPException, status
+from fpdf import FPDF
 from jose import JWTError, jwt
-from psycopg2.errors import UniqueViolation
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from backend.database import Base
 from backend.src.auth.utils import (
     ALGORITHM,
     SECRET_KEY,
     get_password_hash,
     verify_password,
 )
-from backend.src.models import Follow, User  # type: ignore
+from backend.src.models import (
+    Cart,
+    Favorite,
+    Follow,
+    IngredientsInRecipe,
+    Recipe,
+    TagsInRecipe,
+    User,
+)
 from backend.src.users.schemas import UserCreation
+
+
+def random_lower_string() -> str:
+    return "".join(random.choices(string.ascii_lowercase, k=8))
 
 
 def get_object_by_id_or_error(id: int, session: Session, model: Any):
@@ -59,12 +73,201 @@ def create_subscribtion(session: Session, id: int, current_user: User):
         raise HTTPException(status_code=400, detail='Некорректные данные.')
     subscribtion = Follow(user_id=current_user.id, following_id=id)
     session.add(subscribtion)
+    session.commit()
+    return subscribtion
+    """
     try:
         session.commit()
     except IntegrityError as e:
         assert isinstance(e.orig, UniqueViolation)
         raise HTTPException(status_code=400, detail="Некорректные данные.")
     return subscribtion
+"""
+
+
+def check_is_subscribed(
+    session: Session,
+    id: int,
+    current_user_id: int,
+) -> bool:
+    is_subscribed = False
+    statement = select(Follow).where(
+        Follow.id == current_user_id,
+        Follow.following_id == id,
+    )
+    subscribtion = session.scalar(statement)
+    if subscribtion is not None:
+        is_subscribed = True
+    return is_subscribed
+
+
+def check_is_favorite_cart(
+    session: Session,
+    id: int,
+    current_user_id: int,
+    model: Any,
+) -> bool:
+    is_cart_favorite = False
+    statement = select(model).where(
+        model.user_id == current_user_id,
+        model.recipe_id == id,
+    )
+    favorite_cart = session.scalar(statement)
+    if favorite_cart is not None:
+        is_cart_favorite = True
+    return is_cart_favorite
+
+
+def filter_cart_favorite(
+    current_user,
+    queryset,
+    is_in_shopping_cart,
+    is_favorited,
+):
+    if current_user is not None:
+        if is_in_shopping_cart:
+            queryset = queryset.filter(Cart.user_id == current_user.id)
+        if is_favorited:
+            queryset = queryset.filter(Favorite.user_id == current_user.id)
+    return queryset
+
+
+def download_shopping_list(ingredients):
+    ing_list = [f'{ing[1]} ' f'({ing[2]}) - {ing[0]}' for ing in ingredients]
+    pdf = FPDF()
+    pdf.add_font(
+        'DejaVu',
+        style="",
+        fname="../data/DejaVuSansCondensed.ttf",
+        uni=True,
+    )
+    pdf.add_page()
+    pdf.set_font('DejaVu', '', 14)
+    for ingredient in ing_list:
+        pdf.write(8, ingredient)
+        pdf.ln(8)
+    return pdf.output(dest='S').encode('utf-8')
+
+
+def formate_image(image):
+    format, imgstr = image.split(';base64,')
+    ext = format.split('/')[-1]
+    data = base64.b64decode(imgstr)
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    dirname = os.path.join(BASE_DIR, 'static/job')
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    picture_path = os.path.join(dirname, f'{random_lower_string()}.' + ext)
+    with open(picture_path, "wb") as f:
+        f.write(data)
+    return picture_path
+
+
+def create_ingredients_tags_in_recipe(
+    session: Session,
+    ingredients: list[dict[str, int]],
+    tags: list[int],
+    recipe: Any,
+):
+    for ingredient in ingredients:
+        ingredient_recipe = IngredientsInRecipe(
+            recipe_id=recipe.id,
+            ingredient_id=ingredient['id'],
+            amount=ingredient['amount'],
+        )
+        recipe.ingredients.append(ingredient_recipe)
+    for tag in tags:
+        session.add(
+            TagsInRecipe(
+                recipe_id=recipe.id,
+                tag_id=tag,
+            ),
+        )
+    session.commit()
+    session.refresh(recipe)
+    return recipe
+
+
+def get_is_subscribed(session, current_user, user):
+    if current_user is None:
+        is_subscribed = False
+    else:
+        is_subscribed = check_is_subscribed(
+            session=session,
+            id=user.id,
+            current_user_id=current_user.id,
+        )
+    user.is_subscribed = is_subscribed
+    return user
+
+
+def get_is_subscribed_count_recipe(session, current_user, user, recipes_limit):
+    is_subscribed = check_is_subscribed(
+        session=session,
+        id=user.id,
+        current_user_id=current_user.id,
+    )
+    user.is_subscribed = is_subscribed
+    recipes = user.recipes
+    recipes_count = len(recipes)
+    user.recipes_count = recipes_count
+    if recipes_limit is not None:
+        try:
+            recipes = recipes[:recipes_limit]
+            user.recipes = recipes
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Неверное значение.")
+    return user
+
+
+def get_is_subs_is_favorited_is_sc(recipe, session, current_user):
+    author = recipe.author
+    if current_user is None:
+        is_subscribed = False
+        is_favorited = False
+        is_in_shopping_cart = False
+    else:
+        is_subscribed = check_is_subscribed(
+            session,
+            id=author.id,
+            current_user_id=current_user.id,
+        )
+        is_favorited = check_is_favorite_cart(
+            session=session,
+            id=recipe.id,
+            current_user_id=current_user.id,
+            model=Favorite,
+        )
+        is_in_shopping_cart = check_is_favorite_cart(
+            session=session,
+            id=recipe.id,
+            current_user_id=current_user.id,
+            model=Cart,
+        )
+    author.is_subscribed = is_subscribed
+    recipe.author = author
+    recipe.is_favorited = is_favorited
+    recipe.is_in_shopping_cart = is_in_shopping_cart
+    return recipe
+
+
+def create_favorite_cart(
+    session: Session,
+    id: int,
+    current_user: User,
+    model: Any,
+):
+    statement = select(model).where(
+        model.user_id == current_user.id,
+        model.recipe_id == id,
+    )
+    favorite_cart = session.scalar(statement)
+    if favorite_cart is not None:
+        raise HTTPException(status_code=400, detail='Некорректные данные.')
+    favorite_cart = model(user_id=current_user.id, recipe_id=id)
+    session.add(favorite_cart)
+    session.commit()
+    return favorite_cart
 
 
 def get_subscribtion_or_error(session: Session, id: int, current_user_id: int):
@@ -81,24 +284,10 @@ def get_subscribtion_or_error(session: Session, id: int, current_user_id: int):
     return subscribtion
 
 
-def check_is_subscribed(
-    session: Session, id: int, current_user_id: int
-) -> bool:
-    is_subscribed = False
-    statement = select(Follow).where(
-        Follow.id == current_user_id,
-        Follow.following_id == id,
-    )
-    subscribtion = session.scalar(statement)
-    if subscribtion is not None:
-        is_subscribed = True
-    return is_subscribed
-
-
 def delete_object_by_id(
     session: Session,
     id: int,
-    model: Base,
+    model: Any,
 ) -> Any:
     obj = get_object_by_id_or_error(id, session, model)
     session.delete(obj)
@@ -140,6 +329,14 @@ def get_current_user(
         model=User,
     )
     return user
+
+
+def check_user_is_author(user: User, recipe: Recipe):
+    if user.id != recipe.author_id:
+        raise HTTPException(
+            status_code=403,
+            detail="У вас недостаточно прав для выполнения данного действия.",
+        )
 
 
 def get_current_user_without_error(

@@ -1,4 +1,12 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+
+class RecipeReadShort(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    name: str = Field(max_length=200)
+    image: str
+    cooking_time: int = Field(ge=1)
 
 
 class UserBase(BaseModel):
@@ -13,9 +21,14 @@ class UserResponseCreation(UserBase):
 
 
 class AuthorRead(UserResponseCreation):
-    is_subscribed: bool
+    is_subscribed: bool = False
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserRead(AuthorRead):
+    recipes: list[RecipeReadShort]
+    recipes_count: int
 
 
 class UserCreation(UserBase):

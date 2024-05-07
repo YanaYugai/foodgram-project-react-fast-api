@@ -1,7 +1,7 @@
-import dataclasses
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi_paginate import paginate
 from sqlalchemy import select
 
 from backend.database import SessionApi
@@ -12,10 +12,12 @@ from backend.src.auth.utils import (
 )
 from backend.src.crud import services
 from backend.src.models import Follow, User
+from backend.src.recipes.paginator import Page
 from backend.src.users.schemas import (
     AuthorRead,
     UserCreation,
     UserPasswordReset,
+    UserRead,
     UserResponseCreation,
 )
 
@@ -44,7 +46,6 @@ def set_password(
         )
     hashed_password = get_password_hash(data.new_password)
     user.password = hashed_password
-    session.add(user)
     session.commit()
 
 
@@ -54,18 +55,19 @@ def get_me(
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
     user = services.get_current_user(session=session, token=token)
-    return {**dataclasses.asdict(user), 'is_subscribed': False}
+    return user
 
 
 @router.post(
     '/{user_id}/subscribe/',
-    response_model=AuthorRead,
+    response_model=UserRead,
     status_code=201,
 )
 def followed_user(
     user_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
+    recipes_limit: Union[int, None] = 3,
 ):
     user = services.get_object_by_id_or_error(
         id=user_id,
@@ -73,22 +75,18 @@ def followed_user(
         model=User,
     )
     current_user = services.get_current_user(session=session, token=token)
-    subscribtion = services.create_subscribtion(
+    services.create_subscribtion(
         session=session,
         id=user.id,
         current_user=current_user,
     )
-    following = services.get_object_by_id_or_error(
-        id=subscribtion.following_id,
+    user = services.get_is_subscribed_count_recipe(
         session=session,
-        model=User,
+        current_user=current_user,
+        user=user,
+        recipes_limit=recipes_limit,
     )
-    is_subscribed = services.check_is_subscribed(
-        session=session,
-        id=user.id,
-        current_user_id=current_user.id,
-    )
-    return {**dataclasses.asdict(following), 'is_subscribed': is_subscribed}
+    return user
 
 
 @router.delete(
@@ -120,24 +118,21 @@ def unfollowed_user(
     session.commit()
 
 
-@router.get('/subscriptions/', response_model=list[AuthorRead])
+@router.get('/subscriptions/')
 def get_subscription(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+    recipes_limit: Union[int, None] = 3,
+) -> Page[UserRead]:
     current_user = services.get_current_user(session=session, token=token)
     users_is_subscribed = []
     following = current_user.following
     for user in following:
-        is_subscribed = services.check_is_subscribed(
-            session=session,
-            id=user.id,
-            current_user_id=current_user.id,
+        user = services.get_is_subscribed_count_recipe(
+            session, current_user, user, recipes_limit
         )
-        users_is_subscribed.append(
-            {**dataclasses.asdict(user), 'is_subscribed': is_subscribed},
-        )
-    return users_is_subscribed
+        users_is_subscribed.append(user)
+    return paginate(users_is_subscribed)
 
 
 @router.get('/{user_id}/', response_model=AuthorRead)
@@ -155,15 +150,8 @@ def get_user(
         session=session,
         token=token,
     )
-    if current_user is None:
-        is_subscribed = False
-    else:
-        is_subscribed = services.check_is_subscribed(
-            session=session,
-            id=user.id,
-            current_user_id=current_user.id,
-        )
-    return {**dataclasses.asdict(user), 'is_subscribed': is_subscribed}
+    user = services.get_is_subscribed(session, current_user, user)
+    return user
 
 
 @router.post('/', response_model=UserResponseCreation, status_code=201)
@@ -172,30 +160,18 @@ def post_user(user_data: UserCreation, session: SessionApi):
     return user
 
 
-@router.get('/', response_model=list[AuthorRead])
+@router.get('/')
 def get_users(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme_token_not_necessary)],
-):
+) -> Page[AuthorRead]:
     users = services.get_objects(session=session, model=User)
     users_is_subscribed = []
     current_user = services.get_current_user_without_error(
         session=session,
         token=token,
     )
-    if current_user is None:
-        for user in users:
-            users_is_subscribed.append(
-                {**dataclasses.asdict(user), 'is_subscribed': False},
-            )
-    else:
-        for user in users:
-            is_subscribed = services.check_is_subscribed(
-                session=session,
-                id=user.id,
-                current_user_id=current_user.id,
-            )
-            users_is_subscribed.append(
-                {**dataclasses.asdict(user), 'is_subscribed': is_subscribed},
-            )
-    return users_is_subscribed
+    for user in users:
+        user = services.get_is_subscribed(session, current_user, user)
+        users_is_subscribed.append(user)
+    return paginate(users_is_subscribed)

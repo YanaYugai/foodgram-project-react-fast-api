@@ -17,6 +17,7 @@ repos:
     rev: 7.0.0
     hooks:
       - id: flake8
+        exclude: backend/alembic/
 
   - repo: https://github.com/pycqa/isort
     rev: 5.11.5

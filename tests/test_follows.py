@@ -6,7 +6,7 @@ from backend.src.crud import services
 from backend.src.users.schemas import UserCreation
 
 
-def test_add_follow(
+def test_add_follow_correct(
     client,
     headers,
     clear_tables: Session,
@@ -24,22 +24,24 @@ def test_add_follow(
     assert user.username == response_following['username']
     assert user.first_name == response_following['first_name']
     assert user.last_name == response_following['last_name']
+    assert "recipes" in response_following
+    assert "recipes_count" in response_following
     assert "is_subscribed" in response_following
 
 
-def test_get_following(
+def test_get_following_correct(
     client,
-    following,
+    following_with_5_recipes,
 ):
-    user_id, headers = following
+    user_id, headers = following_with_5_recipes
     subscribtion = client.get(
-        '/api/users/subscriptions/',
+        '/api/users/subscriptions/?page=1&limit=6',
         headers=headers,
     )
     response_following = subscribtion.json()
     assert subscribtion.status_code == http.HTTPStatus.OK
-    assert user_id == response_following[0]['id']
-    assert "is_subscribed" in response_following[0]
+    assert user_id == response_following["results"][0]['id']
+    assert "is_subscribed" in response_following["results"][0]
 
 
 def test_get_following_failure_credentials(
