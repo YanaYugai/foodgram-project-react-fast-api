@@ -3,7 +3,9 @@ from typing import Any, Optional
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
+from psycopg2.errors import UniqueViolation
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.database import Base
@@ -13,7 +15,7 @@ from backend.src.auth.utils import (
     get_password_hash,
     verify_password,
 )
-from backend.src.models import User  # type: ignore
+from backend.src.models import Follow, User  # type: ignore
 from backend.src.users.schemas import UserCreation
 
 
@@ -43,6 +45,54 @@ def create_user(session: Session, data: UserCreation):
     session.add(user)
     session.commit()
     return user
+
+
+def create_subscribtion(session: Session, id: int, current_user: User):
+    if current_user.id == id:
+        raise HTTPException(status_code=400, detail='Некорректные данные.')
+    statement = select(Follow).where(
+        Follow.id == current_user.id,
+        Follow.following_id == id,
+    )
+    subscribtion = session.scalar(statement)
+    if subscribtion is not None:
+        raise HTTPException(status_code=400, detail='Некорректные данные.')
+    subscribtion = Follow(user_id=current_user.id, following_id=id)
+    session.add(subscribtion)
+    try:
+        session.commit()
+    except IntegrityError as e:
+        assert isinstance(e.orig, UniqueViolation)
+        raise HTTPException(status_code=400, detail="Некорректные данные.")
+    return subscribtion
+
+
+def get_subscribtion_or_error(session: Session, id: int, current_user_id: int):
+    statement = select(Follow).where(
+        Follow.id == current_user_id,
+        Follow.following_id == id,
+    )
+    subscribtion = session.scalar(statement)
+    if subscribtion is None:
+        raise HTTPException(
+            status_code=400,
+            detail='Пользователь не подписан.',
+        )
+    return subscribtion
+
+
+def check_is_subscribed(
+    session: Session, id: int, current_user_id: int
+) -> bool:
+    is_subscribed = False
+    statement = select(Follow).where(
+        Follow.id == current_user_id,
+        Follow.following_id == id,
+    )
+    subscribtion = session.scalar(statement)
+    if subscribtion is not None:
+        is_subscribed = True
+    return is_subscribed
 
 
 def delete_object_by_id(
@@ -90,3 +140,14 @@ def get_current_user(
         model=User,
     )
     return user
+
+
+def get_current_user_without_error(
+    session: Session,
+    token: str,
+):
+    try:
+        current_user = get_current_user(session=session, token=token)
+    except AttributeError:
+        current_user = None
+    return current_user
