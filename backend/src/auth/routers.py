@@ -5,14 +5,14 @@ from typing import Annotated
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 
-from backend.database import SessionApi
-from backend.src.auth.schemas import TokenCreation
-from backend.src.auth.utils import create_access_token, oauth2_scheme
-from backend.src.crud.services import authenticate_user
-from backend.src.models import Token
+from database import SessionApi
+from src.crud.services import authenticate_user
+from src.models import Token
+
+from .schemas import TokenCreation, UserTokenCreation
+from .utils import create_access_token, oauth2_scheme
 
 load_dotenv()
 
@@ -20,17 +20,17 @@ load_dotenv()
 MINUTES = os.getenv('MINUTES')
 
 
-router = APIRouter(prefix='/api/token', tags=['token'])
+router = APIRouter(prefix='/api/auth/token', tags=['token'])
 
 
 @router.post("/login/", response_model=TokenCreation)
 def login(
     session: SessionApi,
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    form_data: UserTokenCreation,
 ):
     user = authenticate_user(
         session=session,
-        email=form_data.username,
+        email=form_data.email,
         password=form_data.password,
     )
     if not user:

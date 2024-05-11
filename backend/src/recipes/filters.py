@@ -4,7 +4,7 @@ from fastapi import Query
 from fastapi_filter.contrib.sqlalchemy import Filter
 from pydantic import Field
 
-from backend.src.models import Ingredient, Recipe
+from src.models import Ingredient, Recipe
 
 
 class IngredientFilter(Filter):

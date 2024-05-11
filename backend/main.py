@@ -3,11 +3,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi_paginate import add_pagination
 
-from backend.src.auth import routers as auth
-from backend.src.ingredients import routers as ingredients
-from backend.src.recipes import routers as recipes
-from backend.src.tags import routers as tags
-from backend.src.users import routers as users
+from src.auth import routers as auth
+from src.ingredients import routers as ingredients
+from src.recipes import routers as recipes
+from src.tags import routers as tags
+from src.users import routers as users
 
 app = FastAPI()
 

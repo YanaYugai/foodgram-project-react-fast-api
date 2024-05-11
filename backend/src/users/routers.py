@@ -4,16 +4,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_paginate import paginate
 from sqlalchemy import select
 
-from backend.database import SessionApi
-from backend.src.auth.utils import (
+from database import SessionApi
+from src.auth.utils import (
     get_password_hash,
     oauth2_scheme,
     oauth2_scheme_token_not_necessary,
 )
-from backend.src.crud import services
-from backend.src.models import Follow, User
-from backend.src.recipes.paginator import Page
-from backend.src.users.schemas import (
+from src.crud import services
+from src.models import Follow, User
+from src.recipes.paginator import Page
+
+from .schemas import (
     AuthorRead,
     UserCreation,
     UserPasswordReset,

@@ -2,10 +2,11 @@ from typing import List
 
 from fastapi import APIRouter
 
-from backend.database import SessionApi
-from backend.src.crud import services
-from backend.src.models import Tag
-from backend.src.tags.schemas import TagsRead
+from database import SessionApi
+from src.crud import services
+from src.models import Tag
+
+from .schemas import TagsRead
 
 router = APIRouter(prefix='/api/tags', tags=['tags'])
 

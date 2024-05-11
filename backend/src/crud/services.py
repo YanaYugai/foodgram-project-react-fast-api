@@ -11,13 +11,13 @@ from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from backend.src.auth.utils import (
+from src.auth.utils import (
     ALGORITHM,
     SECRET_KEY,
     get_password_hash,
     verify_password,
 )
-from backend.src.models import (
+from src.models import (
     Cart,
     Favorite,
     Follow,
@@ -26,7 +26,7 @@ from backend.src.models import (
     TagsInRecipe,
     User,
 )
-from backend.src.users.schemas import UserCreation
+from src.users.schemas import UserCreation
 
 
 def random_lower_string() -> str:
@@ -155,6 +155,7 @@ def formate_image(image):
     data = base64.b64decode(imgstr)
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     dirname = os.path.join(BASE_DIR, 'static/job')
+    print(dirname)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     picture_path = os.path.join(dirname, f'{random_lower_string()}.' + ext)

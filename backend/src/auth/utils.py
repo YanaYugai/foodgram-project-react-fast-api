@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 
-from backend.config import SECRET_KEY
+from config import SECRET_KEY
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
@@ -49,9 +49,9 @@ class OAuth2PasswordToken_not_necessary(OAuth2PasswordBearer):
         return param
 
 
-oauth2_scheme = OAuth2PasswordToken(tokenUrl="api/token/login/")
+oauth2_scheme = OAuth2PasswordToken(tokenUrl="api/auth/token/login/")
 oauth2_scheme_token_not_necessary = OAuth2PasswordToken_not_necessary(
-    tokenUrl="api/token/login/",
+    tokenUrl="api/auth/token/login/",
 )
 
 

@@ -6,13 +6,10 @@ from fastapi_filter import FilterDepends
 from fastapi_paginate import paginate
 from sqlalchemy import func, select
 
-from backend.database import SessionApi
-from backend.src.auth.utils import (
-    oauth2_scheme,
-    oauth2_scheme_token_not_necessary,
-)
-from backend.src.crud import services
-from backend.src.models import (
+from database import SessionApi
+from src.auth.utils import oauth2_scheme, oauth2_scheme_token_not_necessary
+from src.crud import services
+from src.models import (
     Cart,
     Favorite,
     Ingredient,
@@ -20,13 +17,10 @@ from backend.src.models import (
     Recipe,
     Tag,
 )
-from backend.src.recipes.filters import RecipeFilter
-from backend.src.recipes.paginator import Page
-from backend.src.recipes.schemas import (
-    RecipeCreate,
-    RecipeRead,
-    RecipeReadShort,
-)
+
+from .filters import RecipeFilter
+from .paginator import Page
+from .schemas import RecipeCreate, RecipeRead, RecipeReadShort
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
 
