@@ -64,5 +64,4 @@ jobs:
         python -m alembic upgrade head
         cd ..
         cd tests/
-        python -m pytest test_users.py
-        python -m pytest test_follows.py
+        python -m pytest

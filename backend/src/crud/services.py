@@ -155,7 +155,6 @@ def formate_image(image):
     data = base64.b64decode(imgstr)
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     dirname = os.path.join(BASE_DIR, 'static/job')
-    print(dirname)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     picture_path = os.path.join(dirname, f'{random_lower_string()}.' + ext)

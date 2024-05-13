@@ -19,13 +19,13 @@ services:
     command: sh -c "alembic upgrade head &&
                     uvicorn main:app --proxy-headers --host 0.0.0.0 --port 8000"
     volumes:
-      - media:/app/src/static/job/
+      - media:/backend/src/static/job/
     depends_on:
       - db
   frontend:
     env_file: .env
     build: ../frontend/
-    command: cp -r /app/build/. /frontend_static/
+    command: cp -r /backend/build/. /frontend_static/
     volumes:
       - static:/frontend_static
   nginx:
