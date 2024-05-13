@@ -2,8 +2,8 @@ import http
 
 from sqlalchemy.orm import Session
 
-from backend.src.crud import services
-from backend.src.users.schemas import UserCreation
+from src.crud import services
+from src.users.schemas import UserCreation
 
 
 def test_add_follow_correct(
