@@ -1,10 +1,10 @@
 # Foodgram
 
-![workflow status](https://github.com/YanaYugai/foodgram-project-react/actions/workflows/main.yml/badge.svg)
+![workflow status](https://github.com/YanaYugai/foodgram-project-react_fast_api/actions/workflows/main.yml/badge.svg)
 
 ## Описание проекта
 
-Foodgram позволяет пользователям создавать свои рецепты, подписываться на других авторов и многое другое.
+Foodgram позволяет пользователям создавать свои рецепты, подписываться на других авторов и многое другое. Проект был создан в рамках самообучения для освоения FastApi и SqlAlchemy.
 
 ## Технологии
 
