@@ -187,11 +187,13 @@ def patch_recipe(
     services.check_user_is_author(user=current_user, recipe=recipe)
     image = recipe_data.pop('image')
     picture_path = services.formate_image(image)
-    recipe = Recipe(
-        **recipe_data,
-        author_id=current_user.id,
-        image=picture_path,
-    )
+    recipe = recipe.update(recipe_data)
+    recipe.image = picture_path
+    # recipe = Recipe(
+    #    **recipe_data,
+    #    author_id=current_user.id,
+    #    image=picture_path,
+    # )
     session.add(recipe)
     session.commit()
     session.refresh(recipe)
