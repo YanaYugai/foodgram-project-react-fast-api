@@ -3,16 +3,16 @@ import http
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from backend.src.auth.utils import verify_password
-from backend.src.crud.services import (
+from src.auth.utils import verify_password
+from src.crud.services import (
     authenticate_user,
     create_user,
     get_current_user,
     get_object_by_id_or_error,
     get_objects,
 )
-from backend.src.models import User
-from backend.src.users.schemas import UserCreation
+from src.models import User
+from src.users.schemas import UserCreation
 
 
 def test_get_profile(
@@ -86,11 +86,12 @@ def test_get_access_token(
 ) -> None:
     user = create_user(session=clear_tables, data=user_data)
     login_data = {
-        "username": user.email,
+        "email": user.email,
         "password": user_data.password,
     }
-    response = client.post('api/token/login/', data=login_data)
+    response = client.post('api/auth/token/login/', json=login_data)
     tokens = response.json()
+    print(tokens)
     assert response.status_code == 200
     assert "access_token" in tokens
     assert "auth_token" in tokens
@@ -104,22 +105,22 @@ def test_get_access_token_incorrect_password(
 ) -> None:
     user = create_user(session=clear_tables, data=user_data)
     login_data = {
-        "username": user.email,
+        "email": user.email,
         "password": "invalid_password",
     }
-    response = client.post('api/token/login/', data=login_data)
+    response = client.post('api/auth/token/login/', json=login_data)
     assert response.status_code == 401
 
 
 def test_delete_token(client, headers: dict[str, str]):
-    response = client.delete('api/token/logout/', headers=headers)
+    response = client.delete('api/auth/token/logout/', headers=headers)
     assert response.status_code == 204
 
 
 def test_delete_invalid_token(client):
     token = 'invalid_token'
     headers = {"Authorization": f"Token {token}"}
-    response = client.delete('api/token/logout/', headers=headers)
+    response = client.delete('api/auth/token/logout/', headers=headers)
     assert response.status_code == 401
 
 
@@ -138,10 +139,10 @@ def test_change_password(
     response = client.post('api/users/', json=user_in)
     user = response.json()
     login_data = {
-        "username": user['email'],
+        "email": user['email'],
         "password": user_in["password"],
     }
-    response = client.post('api/token/login/', data=login_data)
+    response = client.post('api/auth/token/login/', json=login_data)
     tokens = response.json()
     token = tokens["access_token"]
     data = {

@@ -4,11 +4,12 @@ from fastapi import APIRouter
 from fastapi_filter import FilterDepends
 from sqlalchemy import select
 
-from backend.database import SessionApi
-from backend.src.crud import services
-from backend.src.ingredients.schemas import IngredientsRead
-from backend.src.models import Ingredient
-from backend.src.recipes.filters import IngredientFilter
+from database import SessionApi
+from src.crud import services
+from src.models import Ingredient
+from src.recipes.filters import IngredientFilter
+
+from .schemas import IngredientsRead
 
 router = APIRouter(prefix="/api/ingredients", tags=["ingredients"])
 

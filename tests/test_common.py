@@ -5,7 +5,7 @@ import pytest
 
 @pytest.mark.parametrize(
     "url",
-    ['/api/recipes/100/', '/api/tags/100/', '/api/ingredients/1000/'],
+    ['/api/recipes/100/', '/api/tags/100/', '/api/ingredients/5000/'],
 )
 def test_nonexistent_objects(url, client):
     response = client.get(url)
@@ -26,15 +26,3 @@ def test_permission_denied(url, client):
     assert response.json() == {
         "detail": "Учетные данные не были предоставлены.",
     }
-
-
-@pytest.mark.parametrize(
-    "url",
-    ['/api/users/', 'api/recipes/', '/api/users/subscriptions/'],
-)
-def test_paginator(url, client):
-    raise NotImplementedError
-
-
-def test_filters(client, url='api/recipes/'):
-    raise NotImplementedError

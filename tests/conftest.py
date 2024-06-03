@@ -7,12 +7,12 @@ from pytest import fixture
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.sql import text
 
-from backend.database import engine
-from backend.main import app
-from backend.src.crud import services
-from backend.src.models import Base
-from backend.src.recipes.schemas import RecipeCreate
-from backend.src.users.schemas import UserCreation
+from database import engine
+from main import app
+from src.crud import services
+from src.models import Base
+from src.recipes.schemas import RecipeCreate
+from src.users.schemas import UserCreation
 
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -138,10 +138,10 @@ def token(
     response = client.post('api/users/', json=user_in)
     user = response.json()
     login_data = {
-        "username": user['email'],
+        "email": user['email'],
         "password": user_in["password"],
     }
-    response = client.post('api/token/login/', data=login_data)
+    response = client.post('api/auth/token/login/', json=login_data)
     tokens = response.json()
     token = tokens["access_token"]
     return token
@@ -179,10 +179,10 @@ def following_with_5_recipes(
 ):
     user = services.create_user(session=clear_tables, data=user_data)
     login_data = {
-        "username": user.email,
+        "email": user.email,
         "password": user_data.password,
     }
-    response = client.post('api/token/login/', data=login_data)
+    response = client.post('api/auth/token/login/', json=login_data)
     tokens = response.json()
     token = tokens["access_token"]
     headers_user = {"Authorization": f"Token {token}"}
@@ -227,10 +227,10 @@ def cart_with_5_recipes(
 ):
     user = services.create_user(session=clear_tables, data=user_data)
     login_data = {
-        "username": user.email,
+        "email": user.email,
         "password": user_data.password,
     }
-    response = client.post('api/token/login/', data=login_data)
+    response = client.post('api/auth/token/login/', json=login_data)
     tokens = response.json()
     token = tokens["access_token"]
     headers_user = {"Authorization": f"Token {token}"}

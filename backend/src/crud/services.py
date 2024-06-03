@@ -11,13 +11,13 @@ from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from backend.src.auth.utils import (
+from src.auth.utils import (
     ALGORITHM,
     SECRET_KEY,
     get_password_hash,
     verify_password,
 )
-from backend.src.models import (
+from src.models import (
     Cart,
     Favorite,
     Follow,
@@ -26,7 +26,7 @@ from backend.src.models import (
     TagsInRecipe,
     User,
 )
-from backend.src.users.schemas import UserCreation
+from src.users.schemas import UserCreation
 
 
 def random_lower_string() -> str:

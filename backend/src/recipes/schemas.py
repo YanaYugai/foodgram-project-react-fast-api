@@ -2,12 +2,12 @@ from typing import List
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.src.ingredients.schemas import (
+from src.ingredients.schemas import (
     IngredientsFullInRecipeRead,
     IngredientsInRecipe,
 )
-from backend.src.tags.schemas import TagsRead
-from backend.src.users.schemas import AuthorRead, RecipeReadShort
+from src.tags.schemas import TagsRead
+from src.users.schemas import AuthorRead, RecipeReadShort
 
 
 class RecipeCreate(BaseModel):
