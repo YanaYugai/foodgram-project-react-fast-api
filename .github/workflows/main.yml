@@ -63,7 +63,7 @@ jobs:
         cat .env
         cd backend/
         python -m alembic upgrade head
-        python -m download.py
+        python -m download
         cd ..
         cd tests/
         python -m pytest
