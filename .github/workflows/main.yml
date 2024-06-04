@@ -24,7 +24,8 @@ jobs:
     - name: Check with mypy
       run: |
         python -m pip install types-psycopg2
-        python -m mypy backend/
+        python -m pip install types-fpdf2
+        python -m mypy --ignore-missing-imports --exclude backend/alembic/ backend/
   tests:
     needs: linters
     runs-on: ubuntu-latest

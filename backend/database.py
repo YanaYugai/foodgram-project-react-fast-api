@@ -12,7 +12,7 @@ from sqlalchemy.orm import (
 from config import DB_HOST, DB_NAME, DB_PASS, DB_USER
 
 SQLALCHEMY_DATABASE_URL = (
-    f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
+    f"postgresql+psycopg://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
 )
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
