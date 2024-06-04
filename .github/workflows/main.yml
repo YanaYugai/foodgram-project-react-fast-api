@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:13
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
@@ -63,7 +63,7 @@ jobs:
         cat .env
         cd backend/
         python -m alembic upgrade head
-        python -m download.py
+        python -m download
         cd ..
         cd tests/
         python -m pytest
