@@ -35,13 +35,13 @@ def create_recipe(
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
     current_user = services.get_current_user(session=session, token=token)
-    recipe_data = recipe_data.model_dump()
-    ingredients = recipe_data.pop('ingredients')
-    tags = recipe_data.pop('tags')
-    image = recipe_data.pop('image')
+    recipe_data_new = recipe_data.model_dump()
+    ingredients = recipe_data_new.pop('ingredients')
+    tags = recipe_data_new.pop('tags')
+    image = recipe_data_new.pop('image')
     picture_path = services.formate_image(image)
     recipe = Recipe(
-        **recipe_data,
+        **recipe_data_new,
         author_id=current_user.id,
         image=picture_path,
     )
@@ -157,8 +157,8 @@ def get_recipes(
         is_favorited,
     )
     result = session.execute(queryset)
-    recipes = result.scalars().all()
-    for recipe in recipes:
+    recipes_list = result.scalars().all()
+    for recipe in recipes_list:
         recipe = services.get_is_subs_is_favorited_is_sc(
             recipe=recipe,
             session=session,
@@ -181,13 +181,13 @@ def patch_recipe(
         session=session,
         model=Recipe,
     )
-    recipe_data = recipe_data.model_dump()
-    ingredients = recipe_data.pop('ingredients')
-    tags = recipe_data.pop('tags')
+    recipe_data_new = recipe_data.model_dump()
+    ingredients = recipe_data_new.pop('ingredients')
+    tags = recipe_data_new.pop('tags')
     services.check_user_is_author(user=current_user, recipe=recipe)
-    image = recipe_data.pop('image')
+    image = recipe_data_new.pop('image')
     picture_path = services.formate_image(image)
-    recipe = recipe.update(recipe_data)
+    recipe = recipe.update(recipe_data_new)
     recipe.image = picture_path
     # recipe = Recipe(
     #    **recipe_data,
