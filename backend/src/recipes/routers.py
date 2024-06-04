@@ -4,7 +4,7 @@ from typing import Annotated, Union
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi_filter import FilterDepends
 from fastapi_paginate import paginate
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from database import SessionApi
 from src.auth.utils import oauth2_scheme, oauth2_scheme_token_not_necessary
@@ -187,14 +187,15 @@ def patch_recipe(
     services.check_user_is_author(user=current_user, recipe=recipe)
     image = recipe_data_new.pop('image')
     picture_path = services.formate_image(image)
-    recipe = recipe.update(recipe_data_new)
-    recipe.image = picture_path
-    # recipe = Recipe(
-    #    **recipe_data,
-    #    author_id=current_user.id,
-    #    image=picture_path,
-    # )
-    session.add(recipe)
+    recipe_data_new["image"] = picture_path
+    stmt = (
+        update(Recipe)
+        .where(
+            Recipe.id == recipe_id,
+        )
+        .values(**recipe_data_new)  # type: ignore
+    )
+    session.execute(stmt)
     session.commit()
     session.refresh(recipe)
     recipe_with_ingredients_and_tags = (
