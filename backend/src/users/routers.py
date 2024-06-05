@@ -33,7 +33,7 @@ def set_password(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
     data: UserPasswordReset,
-):
+) -> None:
     user = services.get_current_user(session=session, token=token)
     user = services.authenticate_user(
         session=session,
@@ -54,7 +54,7 @@ def set_password(
 def get_me(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> User:
     user = services.get_current_user(session=session, token=token)
     return user
 
@@ -69,7 +69,7 @@ def followed_user(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
     recipes_limit: Union[int, None] = 3,
-):
+) -> User:
     user = services.get_object_by_id_or_error(
         id=user_id,
         session=session,
@@ -98,7 +98,7 @@ def unfollowed_user(
     user_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> None:
     user = services.get_object_by_id_or_error(
         id=user_id,
         session=session,
@@ -141,7 +141,7 @@ def get_user(
     user_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme_token_not_necessary)],
-):
+) -> User:
     user = services.get_object_by_id_or_error(
         id=user_id,
         session=session,
@@ -156,7 +156,10 @@ def get_user(
 
 
 @router.post('/', response_model=UserResponseCreation, status_code=201)
-def post_user(user_data: UserCreation, session: SessionApi):
+def post_user(
+    user_data: UserCreation,
+    session: SessionApi,
+) -> User:
     user = services.create_user(session, user_data)
     return user
 
