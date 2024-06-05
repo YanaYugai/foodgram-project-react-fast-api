@@ -143,7 +143,7 @@ def download_shopping_list(ingredients: list[Any]):
     for ingredient in ing_list:
         pdf.write(8, ingredient)
         pdf.ln(8)
-    return pdf.output(dest='S').encode('utf-8')
+    return pdf.output(dest='S').decode('utf-8')
 
 
 def formate_image(image: str) -> str:
