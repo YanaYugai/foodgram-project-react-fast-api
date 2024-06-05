@@ -33,7 +33,7 @@ def create_recipe(
     session: SessionApi,
     recipe_data: RecipeCreate,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> Recipe:
     current_user = services.get_current_user(session=session, token=token)
     recipe_data_new = recipe_data.model_dump()
     ingredients = recipe_data_new.pop('ingredients')
@@ -108,7 +108,7 @@ def get_recipe(
     recipe_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme_token_not_necessary)],
-):
+) -> Recipe:
     recipe = services.get_object_by_id_or_error(
         id=recipe_id,
         session=session,
@@ -174,7 +174,7 @@ def patch_recipe(
     session: SessionApi,
     recipe_data: RecipeCreate,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> Recipe:
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
         id=recipe_id,
@@ -223,7 +223,7 @@ def add_recipe_to_favorite(
     recipe_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> Recipe:
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
         id=recipe_id,
@@ -244,7 +244,7 @@ def delete_recipe_from_favorite(
     recipe_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> None:
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
         id=recipe_id,
@@ -271,7 +271,7 @@ def add_recipe_to_cart(
     recipe_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> Recipe:
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
         id=recipe_id,
@@ -292,7 +292,7 @@ def delete_recipe_from_cart(
     recipe_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> None:
     current_user = services.get_current_user(session=session, token=token)
     recipe = services.get_object_by_id_or_error(
         id=recipe_id,
@@ -315,7 +315,7 @@ def delete_recipe(
     recipe_id: int,
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> None:
     current_user = services.get_current_user(
         session=session,
         token=token,
