@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List, Sequence
 
 from fastapi import APIRouter
 from fastapi_filter import FilterDepends
@@ -15,9 +15,14 @@ router = APIRouter(prefix="/api/ingredients", tags=["ingredients"])
 
 
 @router.get('/{ingredient_id}/', response_model=IngredientsRead)
-def get_ingredient(ingredient_id: int, session: SessionApi):
+def get_ingredient(
+    ingredient_id: int,
+    session: SessionApi,
+) -> Any:
     ingredient = services.get_object_by_id_or_error(
-        ingredient_id, session, Ingredient
+        id=ingredient_id,
+        session=session,
+        model=Ingredient,
     )
     return ingredient
 
@@ -26,7 +31,7 @@ def get_ingredient(ingredient_id: int, session: SessionApi):
 def get_ingredients(
     session: SessionApi,
     ingredient_filter: IngredientFilter = FilterDepends(IngredientFilter),
-):
+) -> Sequence[Any]:
     ingredients = select(Ingredient)
     query = ingredient_filter.filter(ingredients)
     result = session.execute(query)

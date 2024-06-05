@@ -118,8 +118,8 @@ def check_is_favorite_cart(
 def filter_cart_favorite(
     current_user: User,
     queryset: Union[Query, Select],
-    is_in_shopping_cart: Union[int, None],
-    is_favorited: Union[int, None],
+    is_in_shopping_cart: Optional[int],
+    is_favorited: Optional[int],
 ) -> Union[Query, Select]:
     if current_user is not None:
         if is_in_shopping_cart:
@@ -129,7 +129,7 @@ def filter_cart_favorite(
     return queryset
 
 
-def download_shopping_list(ingredients):
+def download_shopping_list(ingredients: list[Any]):
     ing_list = [f'{ing[1]} ' f'({ing[2]}) - {ing[0]}' for ing in ingredients]
     pdf = FPDF()
     pdf.add_font(
@@ -146,7 +146,7 @@ def download_shopping_list(ingredients):
     return pdf.output(dest='S').encode('utf-8')
 
 
-def formate_image(image):
+def formate_image(image: str) -> str:
     format, imgstr = image.split(';base64,')
     ext = format.split('/')[-1]
     data = base64.b64decode(imgstr)
@@ -164,8 +164,8 @@ def create_ingredients_tags_in_recipe(
     session: Session,
     ingredients: list[dict[str, int]],
     tags: list[int],
-    recipe: Any,
-):
+    recipe: Recipe,
+) -> Recipe:
     for ingredient in ingredients:
         ingredient_recipe = IngredientsInRecipe(
             recipe_id=recipe.id,
@@ -185,7 +185,11 @@ def create_ingredients_tags_in_recipe(
     return recipe
 
 
-def get_is_subscribed(session, current_user, user):
+def get_is_subscribed(
+    session: Session,
+    current_user: Optional[User],
+    user: User,
+) -> User:
     if current_user is None:
         is_subscribed = False
     else:
@@ -198,7 +202,12 @@ def get_is_subscribed(session, current_user, user):
     return user
 
 
-def get_is_subscribed_count_recipe(session, current_user, user, recipes_limit):
+def get_is_subscribed_count_recipe(
+    session: Session,
+    current_user: User,
+    user: User,
+    recipes_limit: Optional[int],
+):
     is_subscribed = check_is_subscribed(
         session=session,
         id=user.id,
@@ -217,7 +226,11 @@ def get_is_subscribed_count_recipe(session, current_user, user, recipes_limit):
     return user
 
 
-def get_is_subs_is_favorited_is_sc(recipe, session, current_user):
+def get_is_subs_is_favorited_is_sc(
+    recipe: Recipe,
+    session: Session,
+    current_user: Optional[User],
+) -> Recipe:
     author = recipe.author
     if current_user is None:
         is_subscribed = False
@@ -253,7 +266,7 @@ def create_favorite_cart(
     id: int,
     current_user: User,
     model: Any,
-):
+) -> Any:
     statement = select(model).where(
         model.user_id == current_user.id,
         model.recipe_id == id,
@@ -267,7 +280,11 @@ def create_favorite_cart(
     return favorite_cart
 
 
-def get_subscribtion_or_error(session: Session, id: int, current_user_id: int):
+def get_subscribtion_or_error(
+    session: Session,
+    id: int,
+    current_user_id: int,
+) -> Follow:
     statement = select(Follow).where(
         Follow.id == current_user_id,
         Follow.following_id == id,
@@ -292,7 +309,11 @@ def delete_object_by_id(
     return HTTPStatus.NO_CONTENT
 
 
-def authenticate_user(session: Session, email: str, password: str):
+def authenticate_user(
+    session: Session,
+    email: str,
+    password: str,
+) -> User:
     statement = select(User).where(
         User.email == email,
     )
@@ -307,7 +328,7 @@ def authenticate_user(session: Session, email: str, password: str):
 def get_current_user(
     session: Session,
     token: str,
-):
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Учетные данные не были предоставлены.",
@@ -328,7 +349,10 @@ def get_current_user(
     return user
 
 
-def check_user_is_author(user: User, recipe: Recipe):
+def check_user_is_author(
+    user: User,
+    recipe: Recipe,
+) -> None:
     if user.id != recipe.author_id:
         raise HTTPException(
             status_code=403,
