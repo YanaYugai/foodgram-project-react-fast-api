@@ -27,7 +27,7 @@ router = APIRouter(prefix='/api/auth/token', tags=['token'])
 def login(
     session: SessionApi,
     form_data: UserTokenCreation,
-):
+) -> dict[str, str]:
     user = authenticate_user(
         session=session,
         email=form_data.email,
@@ -67,7 +67,7 @@ def login(
 def logout(
     session: SessionApi,
     token: Annotated[str, Depends(oauth2_scheme)],
-):
+) -> None:
     statement = select(Token).where(Token.access_token == token)
     token = session.scalar(statement)
     if not token:
