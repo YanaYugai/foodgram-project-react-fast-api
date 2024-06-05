@@ -18,7 +18,8 @@ class IngredientFilter(Filter):
 
 class RecipeFilter(Filter):
     author_id: Annotated[
-        Optional[int], Field(Query(default=None, alias="author"))
+        Optional[int],
+        Field(Query(default=None, alias="author")),
     ]
 
     class Constants(Filter.Constants):
