@@ -3,13 +3,14 @@ import os
 import random
 import string
 from http import HTTPStatus
-from typing import Any, Optional
+from typing import Any, Optional, Sequence, Union
 
 from fastapi import HTTPException, status
 from fpdf import FPDF
 from jose import JWTError, jwt
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Query, Session
+from sqlalchemy.sql.selectable import Select
 
 from src.auth.utils import (
     ALGORITHM,
@@ -40,13 +41,13 @@ def get_object_by_id_or_error(id: int, session: Session, model: Any):
     return obj
 
 
-def get_objects(session: Session, model: Any):
+def get_objects(session: Session, model: Any) -> Sequence[Any]:
     statement = select(model)
     objects = session.scalars(statement).all()
     return objects
 
 
-def create_user(session: Session, data: UserCreation):
+def create_user(session: Session, data: UserCreation) -> User:
     username = data.username
     statement = select(User).where(User.username == username)
     user = session.scalar(statement)
@@ -61,7 +62,11 @@ def create_user(session: Session, data: UserCreation):
     return user
 
 
-def create_subscribtion(session: Session, id: int, current_user: User):
+def create_subscribtion(
+    session: Session,
+    id: int,
+    current_user: User,
+) -> Follow:
     if current_user.id == id:
         raise HTTPException(status_code=400, detail='Некорректные данные.')
     statement = select(Follow).where(
@@ -75,14 +80,6 @@ def create_subscribtion(session: Session, id: int, current_user: User):
     session.add(subscribtion)
     session.commit()
     return subscribtion
-    """
-    try:
-        session.commit()
-    except IntegrityError as e:
-        assert isinstance(e.orig, UniqueViolation)
-        raise HTTPException(status_code=400, detail="Некорректные данные.")
-    return subscribtion
-"""
 
 
 def check_is_subscribed(
@@ -119,11 +116,11 @@ def check_is_favorite_cart(
 
 
 def filter_cart_favorite(
-    current_user,
-    queryset,
-    is_in_shopping_cart,
-    is_favorited,
-):
+    current_user: User,
+    queryset: Union[Query, Select],
+    is_in_shopping_cart: Union[int, None],
+    is_favorited: Union[int, None],
+) -> Union[Query, Select]:
     if current_user is not None:
         if is_in_shopping_cart:
             queryset = queryset.filter(Cart.user_id == current_user.id)
@@ -342,7 +339,7 @@ def check_user_is_author(user: User, recipe: Recipe):
 def get_current_user_without_error(
     session: Session,
     token: str,
-):
+) -> User:
     try:
         current_user = get_current_user(session=session, token=token)
     except AttributeError:
