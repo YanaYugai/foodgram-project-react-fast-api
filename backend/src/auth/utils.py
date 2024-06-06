@@ -16,6 +16,12 @@ ALGORITHM = "HS256"
 
 
 class OAuth2PasswordToken(OAuth2PasswordBearer):
+    """
+    Авторизация по протоколу OAuth2. Используется bearer token.
+
+    Вместо названия схемы "Bearer" используется "Token".
+    """
+
     async def __call__(self, request: Request) -> Optional[str]:
         authorization = request.headers.get("Authorization")
         scheme, param = get_authorization_scheme_param(authorization)
@@ -32,6 +38,15 @@ class OAuth2PasswordToken(OAuth2PasswordBearer):
 
 
 class OAuth2PasswordToken_not_necessary(OAuth2PasswordBearer):
+    """
+    Авторизация по протоколу OAuth2. Используется bearer token.
+
+    Вместо названия схемы "Bearer" используется "Token".
+
+    Используется вместо OAuth2PasswordToken, в тех случаях,
+    где пользователь может быть не авторизован.
+    """
+
     async def __call__(self, request: Request) -> Optional[str]:
         authorization = request.headers.get("Authorization")
         scheme, param = get_authorization_scheme_param(authorization)
